@@ -6,7 +6,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
-// ১. অ্যাকাউন্ট রেজিস্ট্রেশন লজিক ফিক্স
+// ১. অ্যাকাউন্ট রেজিস্ট্রেশন লজিক
 router.post('/register', async (req, res) => {
     const { regName, regId, regPassword } = req.body;
     try {
@@ -21,14 +21,13 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// ২. ইউজার লগইন লজিক (🎯 সেশন অ্যারে ম্যাপিং ফিক্স)
+// ২. ইউজার লগইন লজিক (🎯 সেশন অবজেক্ট লক ফিক্সড)
 router.post('/login', async (req, res) => {
     const { loginId, loginPassword } = req.body;
     try {
         const [rows] = await db.execute("SELECT * FROM imm_users WHERE user_id = ?", [loginId]);
-        
-        // 🎯 FIXED: rows[0] ব্যবহার করে সেশনে অ্যারের বদলে শুধুমাত্র সিঙ্গেল ইউজার অবজেক্ট সেভ করা হলো
         if (rows.length > 0 && rows[0].password === loginPassword) {
+            // 🎯 FIXED: rows[0] সুনির্দিষ্টভাবে অবজেক্ট সেশনে লক করা হলো
             req.session.user = rows[0]; 
             res.redirect('/');
         } else {
@@ -56,13 +55,13 @@ router.post('/upload', upload.single('pdfFile'), async (req, res) => {
     }
 });
 
-// ৫. কারেন্ট লগইন ইউজারের ডাটা চেক (🎯 সেশন ইন্ডেক্সিং ফিক্স)
+// ৫. কারেন্ট লগইন ইউজারের ডাটা চেক
 router.get('/api/user-data', async (req, res) => {
     if (!req.session.user) return res.json({ loggedIn: false });
     try {
         const [rows] = await db.execute("SELECT name, user_id, pdf_name, app_status, payment_status, visa_status FROM imm_users WHERE user_id = ?", [req.session.user.user_id]);
         if (rows.length > 0) {
-            // 🎯 FIXED: rows[0] পাঠিয়ে ফ্রন্টএন্ডে অবজেক্ট ম্যাপিং পারফেক্ট করা হলো
+            // 🎯 FIXED: ফ্রন্টএন্ডের সুবিধার্থে প্রথম রো-টি অবজেক্ট আকারে পাঠানো হলো
             res.json({ loggedIn: true, user: rows[0] });
         } else {
             res.json({ loggedIn: false });
