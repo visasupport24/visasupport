@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>High Commission Check Immigration</title>
-    <!-- 🎯 এক্সটার্নাল স্টাইলশীট লিংক করা হলো -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -82,13 +81,8 @@
     <div class="footer-grid">
         <div class="footer-brand">
             <h2>High Commission</h2>
-            <p style="color:#94a3b8; font-size:12px; margin-top:-5px;">Immigration Services</p>
-            <p style="margin-top:10px;">Your trusted partner for visa and immigration services since 2009.</p>
+            <p>Your trusted partner for visa and immigration services since 2009.</p>
         </div>
-        <div class="footer-column"><h3>Quick Links</h3><ul class="footer-links"><li><a href="#">Home</a></li><li><a href="#">Visa Types</a></li></ul></div>
-        <div class="footer-column"><h3>Visa Services</h3><ul class="footer-links"><li><a href="#">Tourist Visa</a></li><li><a href="#">Work Visa</a></li></ul></div>
-        <div class="footer-column"><h3>Facilities</h3><ul class="footer-links"><li><a href="#">Farm Work</a></li><li><a href="#">Factory</a></li></ul></div>
-        <div class="footer-column"><h3>Legal</h3><ul class="footer-links"><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li></ul></div>
     </div>
     <div class="footer-bottom">&copy; 2026 High Commission. All rights reserved.</div>
 </footer>
@@ -102,7 +96,7 @@
         if(tabName === 'admin') fetchAdminData();
     }
 
-        async function checkSession() {
+    async function checkSession() {
         const res = await fetch('/api/user-data');
         const data = await res.json();
         if (data.loggedIn) {
@@ -111,6 +105,7 @@
             document.getElementById('welcomeMsg').innerText = `Welcome, ${data.user.name}`;
             
             if(data.user.pdf_name) {
+                // 🎯 FIXED: ডাটাবেস অবজেক্টের সরাসরি প্রপার্টি রিড
                 document.getElementById('statusDetails').innerHTML = `
                     <p style="margin: 8px 0;"><b>Document File:</b> ${data.user.pdf_name}</p>
                     <p style="margin: 8px 0;"><b>2. Application Status:</b> <span class="status-badge ${data.user.app_status.toLowerCase()}">${data.user.app_status}</span></p>
@@ -118,12 +113,11 @@
                     <p style="margin: 8px 0;"><b>4. Visa Immigration Status:</b> <span class="status-badge ${data.user.visa_status.toLowerCase()}">${data.user.visa_status}</span></p>
                 `;
                 if(data.user.app_status === 'Successful') {
-                    // 🎯 এখানে নতুন ভেরিফিকেশন ভিউ পেজের বাটনটি যুক্ত হলো
                     document.getElementById('statusDetails').innerHTML += `
                         <div class="share-box" style="background: #ecfdf5; border: 1px dashed #10b981; padding: 15px; margin-top: 15px; border-radius: 6px; text-align: center;">
                             <h4 style="margin:0 0 5px 0; color:#065f46;">🔒 Security Verification Path Activated</h4>
-                            <p style="font-size:12.5px; margin:0 0 12px 0; color:#065f46;">Your application is <b>Successful</b>. Access the digital clearance dossier page:</p>
-                            <a href="/?shared_user=${data.user.user_id}" target="_blank" style="display: inline-block; background: #10b981; color: white; padding: 10px 22px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">📄 View Full PDF Document</a>
+                            <p style="font-size:12.5px; margin:0 0 12px 0; color:#065f46;">Your application is successful. Access the clearance dossier:</p>
+                            <a href="/?shared_user=${data.user.user_id}" target="_blank" style="display: inline-block; background: #10b981; color: white; padding: 10px 22px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">📄 View Full PDF Document</a>
                         </div>`;
                 }
             } else {
@@ -131,7 +125,6 @@
             }
         }
     }
-
 
     function verifyAdminKey() {
         if (document.getElementById('adminSecretKey').value === "Admin@123") {
@@ -166,18 +159,18 @@
                             <div><input type="text" name="new_payment" value="${row.payment_status}"></div>
                             <div>
                                 <select name="new_visa">
-                                                                        <option value="Pending" ${row.visa_status==='Pending'?'selected':''}>Pending</option>
-                                    <option value="Approved" ${row.visa_status==='Approved'?'selected' :''}>Approved</option>
-                                    <option value="Rejected" ${row.visa_status==='Rejected'?'selected':''}>Rejected</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                            <a href="/?shared_user=${row.user_id}" target="_blank" style="background:#10b981; color:white; padding:6px 12px; text-decoration:none; border-radius:6px; font-size:13px; font-weight:bold;">📄 Stream File</a>
-                            <button type="submit" style="background:#0b2545; color:white; border:none; padding:7px 15px; border-radius:6px; font-size:13px; font-weight:bold;">Apply</button>
-                        </div>
-                    </form>
-                </div>`;
+                                                                <option value="Pending" ${row.visa_status==='Pending'?'selected':''}>Pending</option>
+                            <option value="Approved" ${row.visa_status==='Approved'?'selected' :''}>Approved</option>
+                            <option value="Rejected" ${row.visa_status==='Rejected'?'selected':''}>Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                    <a href="/?shared_user=${row.user_id}" target="_blank" style="background:#10b981; color:white; padding:6px 12px; text-decoration:none; border-radius:6px; font-size:13px; font-weight:bold;">📄 Stream File</a>
+                    <button type="submit" style="background:#0b2545; color:white; border:none; padding:7px 15px; border-radius:6px; font-size:13px; font-weight:bold;">Apply</button>
+                </div>
+            </form>
+        </div>`;
         });
     }
 
