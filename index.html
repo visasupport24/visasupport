@@ -192,48 +192,59 @@
         } else { alert('Access Denied! Incorrect Security Pin.'); }
     }
 
-    async function fetchAdminData() {
+        async function fetchAdminData() {
         const res = await fetch('/api/admin-data');
         const list = await res.json();
         const container = document.getElementById('adminAppList');
         container.innerHTML = '';
+        
+        // যদি কোনো ইউজার ফাইল আপলোড না করে থাকে
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#6b7280; padding:20px;">No application dossiers found in database stream.</p>';
+            return;
+        }
+
+        // লুপের মাধ্যমে প্রতিটি ইউজারের ডেটা সাজানো হবে
         list.forEach(row => {
+            // ডাটাবেস অবজেক্ট চেক ফিক্স
+            const userData = row; 
             container.innerHTML += `
-                <div class="app-list-item">
-                    <strong>Applicant Name:</strong> ${row.name} | <strong>User ID:</strong> ${row.user_id}<br>
-                    <strong>Filename Reference:</strong> ${row.pdf_name} <br>
+                <div class="app-list-item" style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 15px; border-radius: 8px; text-align: left;">
+                    <strong>Applicant Name:</strong> ${userData.name} | <strong>User ID:</strong> ${userData.user_id}<br>
+                    <strong>Filename Reference:</strong> ${userData.pdf_name} <br>
                     <form action="/admin-update" method="POST" style="margin-top:15px; border-top:1px solid #e5e7eb; padding-top:10px;">
-                        <input type="hidden" name="target_user_id" value="${row.user_id}">
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:10px;">
+                        <input type="hidden" name="target_user_id" value="${userData.user_id}">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:10px;">
                             <div>
-                                <label style="margin:0; font-size:13px;">Application Status</label>
-                                <select name="new_app_status" style="padding:6px; margin-top:3px;">
-                                    <option value="Pending" ${row.app_status==='Pending'?'selected':''}>Pending</option>
-                                    <option value="Successful" ${row.app_status==='Successful'?'selected':''}>Successful</option>
-                                    <option value="Rejected" ${row.app_status==='Rejected'?'selected':''}>Rejected</option>
+                                <label style="margin:0; font-size:12px; font-weight:bold;">Application Status</label>
+                                <select name="new_app_status" style="padding:6px; margin-top:3px; width:100%;">
+                                    <option value="Pending" ${userData.app_status==='Pending'?'selected':''}>Pending</option>
+                                    <option value="Successful" ${userData.app_status==='Successful'?'selected':''}>Successful</option>
+                                    <option value="Rejected" ${userData.app_status==='Rejected'?'selected':''}>Rejected</option>
                                 </select>
                             </div>
                             <div>
-                                <label style="margin:0; font-size:13px;">Payment Status / Balance</label>
-                                <input type="text" name="new_payment" value="${row.payment_status}" style="padding:6px; margin-top:3px;">
+                                <label style="margin:0; font-size:12px; font-weight:bold;">Payment specifications</label>
+                                <input type="text" name="new_payment" value="${userData.payment_status}" style="padding:6px; margin-top:3px; width:100%; box-sizing:border-box;">
                             </div>
                             <div>
-                                <label style="margin:0; font-size:13px;">Visa Status</label>
-                                <select name="new_visa" style="padding:6px; margin-top:3px;">
-                                    <option value="Pending" ${row.visa_status==='Pending'?'selected':''}>Pending</option>
-                                    <option value="Approved" ${row.visa_status==='Approved'?'selected' :''}>Approved</option>
-                                    <option value="Rejected" ${row.visa_status==='Rejected'?'selected':''}>Rejected</option>
+                                <label style="margin:0; font-size:12px; font-weight:bold;">Visa Status</label>
+                                <select name="new_visa" style="padding:6px; margin-top:3px; width:100%;">
+                                    <option value="Pending" ${userData.visa_status==='Pending'?'selected':''}>Pending</option>
+                                    <option value="Approved" ${userData.visa_status==='Approved'?'selected':''}>Approved</option>
+                                    <option value="Rejected" ${userData.visa_status==='Rejected'?'selected':''}>Rejected</option>
                                 </select>
                             </div>
                         </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                            <a href="/?shared_user=${row.user_id}" target="_blank" style="background:#10b981; color:white; padding:6px 12px; text-decoration:none; border-radius:6px; font-size:13px; font-weight:bold;">📄 Stream File</a>
-                            <button type="submit" style="background:#0b2545; color:white; border:none; padding:7px 15px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">Apply Configurations</button>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                            <a href="/?shared_user=${userData.user_id}" target="_blank" style="background:#10b981; color:white; padding:8px 14px; text-decoration:none; border-radius:6px; font-size:13px; font-weight:bold;">📄 Stream File</a>
+                            <button type="submit" style="background:#0b2545; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">Apply Configurations</button>
                         </div>
                     </form>
                 </div>`;
         });
     }
+
 
     window.onload = function() {
         checkSession(); 
