@@ -24,33 +24,22 @@ const pool = mysql.createPool({
 });
 const db = pool.promise();
 
-// ⚙️ DATABASE AUTO-RESET & FIXING ENGINES
-async function initDatabase() {
-    try {
-        // ১. যদি পুরাতন কোনো ত্রুটিযুক্ত টেবিল থাকে তা মুছে ফেলা হবে
-        await db.execute(`DROP TABLE IF EXISTS imm_users`);
-        console.log("Old table cleaned successfully.");
-
-        // ২. নতুন করে ১০০০০০% একুরেট টেবিল তৈরি করা হবে
-        await db.execute(`
-            CREATE TABLE imm_users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id VARCHAR(50) UNIQUE NOT NULL,
-                name VARCHAR(100) NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                pdf_name VARCHAR(255) NULL,
-                pdf_data LONGBLOB NULL,
-                app_status VARCHAR(20) DEFAULT 'Pending',
-                payment_status VARCHAR(50) DEFAULT 'Not Paid',
-                visa_status VARCHAR(20) DEFAULT 'Pending'
-            )
-        `);
-        console.log("100000% accurate database table initialized.");
-    } catch (err) {
-        console.error("Database initialization error:", err);
-    }
-}
-initDatabase();
+// 🎯 FIXED: টেবিলটি যদি না থাকে তবেই কেবল তৈরি হবে, কোনো ডেটা ডিলিট হবে না
+db.execute(`
+    CREATE TABLE IF NOT EXISTS imm_users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id VARCHAR(50) UNIQUE NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        pdf_name VARCHAR(255) NULL,
+        pdf_data LONGBLOB NULL,
+        app_status VARCHAR(20) DEFAULT 'Pending',
+        payment_status VARCHAR(50) DEFAULT 'Not Paid',
+        visa_status VARCHAR(20) DEFAULT 'Pending'
+    )
+`)
+.then(() => console.log("Database synchronized successfully."))
+.catch(err => console.error("Database sync failed:", err));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
@@ -90,6 +79,7 @@ app.post('/register', async (req, res) => {
         await db.execute("INSERT INTO imm_users (user_id, name, password) VALUES (?, ?, ?)", [regId, regName, regPassword]);
         res.send("<script>alert('Registration successful! Please login.'); window.location.href='/';</script>");
     } catch (e) {
+        console.error("Reg Error:", e);
         res.send("<script>alert('Server encountered an error during registration.'); window.location.href='/';</script>");
     }
 });
@@ -99,7 +89,7 @@ app.post('/login', async (req, res) => {
     try {
         const [rows] = await db.execute("SELECT * FROM imm_users WHERE user_id = ?", [loginId]);
         if (rows.length > 0 && rows[0].password === loginPassword) {
-            req.session.user = rows[0]; // জাবাস্ক্রিপ্ট ইনডেক্স [0] ফিক্স
+            req.session.user = rows[0]; // Node-MySQL Array Mapping Fix
             res.redirect('/');
         } else {
             res.send("<script>alert('Invalid credentials!'); window.location.href='/';</script>");
