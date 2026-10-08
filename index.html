@@ -96,16 +96,16 @@
         if(tabName === 'admin') fetchAdminData();
     }
 
-    async function checkSession() {
+        async function checkSession() {
         const res = await fetch('/api/user-data');
         const data = await res.json();
-        if (data.loggedIn) {
+        if (data.loggedIn && data.user) {
             document.getElementById('loginFormArea').style.display = 'none';
             document.getElementById('userDashboard').style.display = 'block';
             document.getElementById('welcomeMsg').innerText = `Welcome, ${data.user.name}`;
             
             if(data.user.pdf_name) {
-                // 🎯 FIXED: ডাটাবেস অবজেক্টের সরাসরি প্রপার্টি রিড
+                // 🎯 FIXED: ব্যাকএন্ড অবজেক্টের সাথে ফ্রন্টএন্ডের ডাটা ট্র্যাকিং সিঙ্ক করা হলো
                 document.getElementById('statusDetails').innerHTML = `
                     <p style="margin: 8px 0;"><b>Document File:</b> ${data.user.pdf_name}</p>
                     <p style="margin: 8px 0;"><b>2. Application Status:</b> <span class="status-badge ${data.user.app_status.toLowerCase()}">${data.user.app_status}</span></p>
@@ -125,6 +125,7 @@
             }
         }
     }
+
 
     function verifyAdminKey() {
         if (document.getElementById('adminSecretKey').value === "Admin@123") {
