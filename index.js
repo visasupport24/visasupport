@@ -80,8 +80,9 @@ app.post('/login', async (req, res) => {
     const { loginId, loginPassword } = req.body;
     try {
         const [rows] = await db.execute("SELECT * FROM imm_users WHERE user_id = ?", [loginId]);
+        // 🎯 FIXED: rows[0] ব্যবহার করে অ্যারের প্রথম উপাদান সুনির্দিষ্টভাবে রিড করা হলো
         if (rows.length > 0 && rows[0].password === loginPassword) {
-            req.session.user = rows[0];
+            req.session.user = rows[0]; 
             res.redirect('/');
         } else {
             res.send("<script>alert('Invalid credentials!'); window.location.href='/';</script>");
