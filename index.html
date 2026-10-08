@@ -4,54 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>High Commission Check Immigration</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; color: #1f2937; display: flex; flex-direction: column; min-height: 100vh; }
-        .main-content { flex: 1; padding: 20px; }
-        .container { max-width: 750px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 20px auto; }
-        h1, h2, h3 { text-align: center; color: #0b2545; margin-bottom: 5px; }
-        
-        .nav-tabs { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; }
-        .tab-btn { background-color: #f3f4f6; border: 1px solid #d1d5db; padding: 12px 20px; font-size: 15px; cursor: pointer; font-weight: bold; color: #4b5563; border-radius: 6px; flex: 1; min-width: 140px; text-align: center; transition: 0.2s; }
-        .tab-btn.active { color: #ffffff; background-color: #1e3a8a; border-color: #1e3a8a; }
-        
-        .section { display: none; }
-        .section.active { display: block; }
-        label { font-weight: 600; display: block; margin-top: 15px; color: #374151; }
-        input, select { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        button.submit-btn, .link-btn { background-color: #1e3a8a; color: white; border: none; padding: 12px; margin-top: 20px; cursor: pointer; border-radius: 6px; width: 100%; font-size: 16px; font-weight: bold; text-align:center; text-decoration:none; display:block; box-sizing: border-box; }
-        button.submit-btn:hover, .link-btn:hover { background-color: #1d4ed8; }
-        
-        .status-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; margin-top: 20px; border-radius: 8px; }
-        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; text-transform: uppercase; }
-        
-        .pending { background: #fef3c7; color: #d97706; }
-        .successful, .approved { background: #dcfce7; color: #16a34a; }
-        .rejected { background: #fee2e2; color: #dc2626; }
-        
-        .share-box { background: #ecfdf5; border: 1px dashed #10b981; padding: 15px; margin-top: 15px; border-radius: 6px; }
-        .share-link { width: 100%; padding: 8px; background: white; border: 1px solid #a7f3d0; border-radius: 4px; font-family: monospace; font-size: 12px; margin-top: 5px; box-sizing: border-box; }
-        .app-list-item { background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 15px; border-radius: 8px; }
-        .admin-auth-box { max-width: 400px; margin: 30px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; text-align: center; }
-
-        .site-footer { background-color: #0b2545; color: #ffffff; padding: 40px 20px 20px 20px; margin-top: 50px; font-size: 14px; }
-        .footer-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; }
-        .footer-brand h2 { color: #ffffff; text-align: left; margin: 0 0 5px 0; font-size: 22px; }
-        .footer-brand p { color: #cbd5e1; line-height: 1.6; font-size: 13px; }
-        .social-icons { display: flex; gap: 12px; margin-top: 15px; }
-        .social-icons a { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255,255,255,0.08); color: #fff; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 15px; transition: 0.3s; }
-        .social-icons a:hover { background: #2563eb; }
-        .footer-column h3 { color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
-        .footer-links { list-style: none; padding: 0; margin: 0; }
-        .footer-links li { margin-bottom: 10px; }
-        .footer-links a { color: #cbd5e1; text-decoration: none; transition: 0.2s; font-size: 13px; }
-        .footer-links a:hover { color: #ffffff; padding-left: 4px; }
-        .footer-bottom { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 13px; }
-
-        @media (max-width: 600px) {
-            .nav-tabs { flex-direction: column; }
-            .tab-btn { width: 100%; }
-        }
-    </style>
+    <!-- 🎯 এক্সটার্নাল স্টাইলশীট লিংক করা হলো -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -63,7 +17,6 @@
         <div class="nav-tabs">
             <button class="tab-btn active" id="btn-register" onclick="switchTab('register')">📝 Registration</button>
             <button class="tab-btn" id="btn-login" onclick="switchTab('login')">🔑 User Login</button>
-            <!-- 🔐 Admin Panel বাটনটি ডিফল্টভাবে সম্পূর্ণ হাইড (display: none) করা হলো -->
             <button class="tab-btn" id="btn-admin" style="display: none;" onclick="switchTab('admin')">👑 Admin Panel</button>
         </div>
 
@@ -130,19 +83,12 @@
         <div class="footer-brand">
             <h2>High Commission</h2>
             <p style="color:#94a3b8; font-size:12px; margin-top:-5px;">Immigration Services</p>
-            <p style="margin-top:10px;">Your trusted partner for visa and immigration services since 2009. We help thousands of people achieve their dreams of living, working, and studying abroad.</p>
-            <div class="social-icons">
-                <a href="#">f</a>
-                <a href="#">𝕏</a>
-                <a href="#">in</a>
-                <a href="#">i</a>
-                <a href="#">▶</a>
-            </div>
+            <p style="margin-top:10px;">Your trusted partner for visa and immigration services since 2009.</p>
         </div>
-                <div class="footer-column"><h3>Quick Links</h3><ul class="footer-links"><li><a href="#">Home</a></li><li><a href="#">Visa Types</a></li><li><a href="#">Jobs Abroad</a></li></ul></div>
-        <div class="footer-column"><h3>Visa Services</h3><ul class="footer-links"><li><a href="#">Tourist Visa</a></li><li><a href="#">Business Visa</a></li><li><a href="#">Work Visa</a></li></ul></div>
-        <div class="footer-column"><h3>Working Facilities</h3><ul class="footer-links"><li><a href="#">Farm Work</a></li><li><a href="#">Factory</a></li><li><a href="#">Construction</a></li></ul></div>
-        <div class="footer-column"><h3>Legal</h3><ul class="footer-links"><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li><li><a href="#">Refund Policy</a></li></ul></div>
+        <div class="footer-column"><h3>Quick Links</h3><ul class="footer-links"><li><a href="#">Home</a></li><li><a href="#">Visa Types</a></li></ul></div>
+        <div class="footer-column"><h3>Visa Services</h3><ul class="footer-links"><li><a href="#">Tourist Visa</a></li><li><a href="#">Work Visa</a></li></ul></div>
+        <div class="footer-column"><h3>Facilities</h3><ul class="footer-links"><li><a href="#">Farm Work</a></li><li><a href="#">Factory</a></li></ul></div>
+        <div class="footer-column"><h3>Legal</h3><ul class="footer-links"><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li></ul></div>
     </div>
     <div class="footer-bottom">&copy; 2026 High Commission. All rights reserved.</div>
 </footer>
@@ -175,12 +121,11 @@
                     document.getElementById('statusDetails').innerHTML += `
                         <div class="share-box">
                             <h4 style="margin:0 0 5px 0; color:#065f46;">🔒 Share Verification Path</h4>
-                            <p style="font-size:12.5px; margin:0; color:#065f46;">Your deployment is <b>Successful</b>. Distributed check link is active:</p>
                             <input type="text" class="share-link" readonly onclick="this.select()" value="${window.location.origin}/?shared_user=${data.user.user_id}">
                         </div>`;
                 }
             } else {
-                document.getElementById('statusDetails').innerHTML = '<p style="color:#6b7280; margin:0;">No application file uploaded yet. Submit your dossier to prompt verification status updates.</p>';
+                document.getElementById('statusDetails').innerHTML = '<p style="color:#6b7280; margin:0;">No application file uploaded yet.</p>';
             }
         }
     }
@@ -189,62 +134,49 @@
         if (document.getElementById('adminSecretKey').value === "Admin@123") {
             document.getElementById('adminAuth').style.display = 'none';
             document.getElementById('adminContent').style.display = 'block';
-        } else { alert('Access Denied! Incorrect Security Pin.'); }
+        } else { alert('Access Denied!'); }
     }
 
-        async function fetchAdminData() {
+    async function fetchAdminData() {
         const res = await fetch('/api/admin-data');
         const list = await res.json();
         const container = document.getElementById('adminAppList');
         container.innerHTML = '';
-        
-        // যদি কোনো ইউজার ফাইল আপলোড না করে থাকে
         if (!list || list.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#6b7280; padding:20px;">No application dossiers found in database stream.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#6b7280; padding:20px;">No application dossiers found.</p>';
             return;
         }
-
-        // লুপের মাধ্যমে প্রতিটি ইউজারের ডেটা সাজানো হবে
         list.forEach(row => {
-            // ডাটাবেস অবজেক্ট চেক ফিক্স
-            const userData = row; 
             container.innerHTML += `
-                <div class="app-list-item" style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 15px; border-radius: 8px; text-align: left;">
-                    <strong>Applicant Name:</strong> ${userData.name} | <strong>User ID:</strong> ${userData.user_id}<br>
-                    <strong>Filename Reference:</strong> ${userData.pdf_name} <br>
+                <div class="app-list-item" style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 15px; border-radius: 8px;">
+                    <strong>Applicant Name:</strong> ${row.name} | <strong>User ID:</strong> ${row.user_id}<br>
                     <form action="/admin-update" method="POST" style="margin-top:15px; border-top:1px solid #e5e7eb; padding-top:10px;">
-                        <input type="hidden" name="target_user_id" value="${userData.user_id}">
+                        <input type="hidden" name="target_user_id" value="${row.user_id}">
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:10px;">
                             <div>
-                                <label style="margin:0; font-size:12px; font-weight:bold;">Application Status</label>
-                                <select name="new_app_status" style="padding:6px; margin-top:3px; width:100%;">
-                                    <option value="Pending" ${userData.app_status==='Pending'?'selected':''}>Pending</option>
-                                    <option value="Successful" ${userData.app_status==='Successful'?'selected':''}>Successful</option>
-                                    <option value="Rejected" ${userData.app_status==='Rejected'?'selected':''}>Rejected</option>
+                                <select name="new_app_status">
+                                    <option value="Pending" ${row.app_status==='Pending'?'selected':''}>Pending</option>
+                                    <option value="Successful" ${row.app_status==='Successful'?'selected':''}>Successful</option>
+                                    <option value="Rejected" ${row.app_status==='Rejected'?'selected':''}>Rejected</option>
                                 </select>
                             </div>
+                            <div><input type="text" name="new_payment" value="${row.payment_status}"></div>
                             <div>
-                                <label style="margin:0; font-size:12px; font-weight:bold;">Payment specifications</label>
-                                <input type="text" name="new_payment" value="${userData.payment_status}" style="padding:6px; margin-top:3px; width:100%; box-sizing:border-box;">
-                            </div>
-                            <div>
-                                <label style="margin:0; font-size:12px; font-weight:bold;">Visa Status</label>
-                                <select name="new_visa" style="padding:6px; margin-top:3px; width:100%;">
-                                    <option value="Pending" ${userData.visa_status==='Pending'?'selected':''}>Pending</option>
-                                    <option value="Approved" ${userData.visa_status==='Approved'?'selected':''}>Approved</option>
-                                    <option value="Rejected" ${userData.visa_status==='Rejected'?'selected':''}>Rejected</option>
+                                <select name="new_visa">
+                                                                        <option value="Pending" ${row.visa_status==='Pending'?'selected':''}>Pending</option>
+                                    <option value="Approved" ${row.visa_status==='Approved'?'selected' :''}>Approved</option>
+                                    <option value="Rejected" ${row.visa_status==='Rejected'?'selected':''}>Rejected</option>
                                 </select>
                             </div>
                         </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
-                            <a href="/?shared_user=${userData.user_id}" target="_blank" style="background:#10b981; color:white; padding:8px 14px; text-decoration:none; border-radius:6px; font-size:13px; font-weight:bold;">📄 Stream File</a>
-                            <button type="submit" style="background:#0b2545; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">Apply Configurations</button>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                            <a href="/?shared_user=${row.user_id}" target="_blank" style="background:#10b981; color:white; padding:6px 12px; text-decoration:none; border-radius:6px; font-size:13px; font-weight:bold;">📄 Stream File</a>
+                            <button type="submit" style="background:#0b2545; color:white; border:none; padding:7px 15px; border-radius:6px; font-size:13px; font-weight:bold;">Apply</button>
                         </div>
                     </form>
                 </div>`;
         });
     }
-
 
     window.onload = function() {
         checkSession(); 
