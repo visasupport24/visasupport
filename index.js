@@ -69,10 +69,16 @@ app.get('/', async (req, res) => {
 app.post('/register', async (req, res) => {
     const { regName, regId, regPassword } = req.body;
     try {
+        // 🎯 FIXED: আইডিটি অলরেডি আছে কিনা তা দৈর্ঘ্য (length) দিয়ে চেক করা হচ্ছে
+        const [existing] = await db.execute("SELECT id FROM imm_users WHERE user_id = ?", [regId]);
+        if (existing.length > 0) {
+            return res.send("<script>alert('User ID or Passport already exists!'); window.location.href='/';</script>");
+        }
+        
         await db.execute("INSERT INTO imm_users (user_id, name, password) VALUES (?, ?, ?)", [regId, regName, regPassword]);
-        res.send("<script>alert('Registration successful!'); window.location.href='/';</script>");
+        res.send("<script>alert('Registration successful! Please login.'); window.location.href='/';</script>");
     } catch (e) {
-        res.send("<script>alert('User ID already exists!'); window.location.href='/';</script>");
+        res.send("<script>alert('Server encountered an error during registration.'); window.location.href='/';</script>");
     }
 });
 
@@ -80,7 +86,7 @@ app.post('/login', async (req, res) => {
     const { loginId, loginPassword } = req.body;
     try {
         const [rows] = await db.execute("SELECT * FROM imm_users WHERE user_id = ?", [loginId]);
-        // 🎯 FIXED: rows[0] ব্যবহার করে অ্যারের প্রথম উপাদান সুনির্দিষ্টভাবে রিড করা হলো
+        // 🎯 FIXED: অ্যারের প্রথম উপাদান rows[0] সুনির্দিষ্টভাবে রিড করা হলো
         if (rows.length > 0 && rows[0].password === loginPassword) {
             req.session.user = rows[0]; 
             res.redirect('/');
