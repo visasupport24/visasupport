@@ -24,7 +24,7 @@ const pool = mysql.createPool({
 });
 const db = pool.promise();
 
-// 🎯 FIXED: টেবিলটি যদি না থাকে তবেই কেবল তৈরি হবে, কোনো ডেটা ডিলিট হবে না
+// Table Auto-Initialization
 db.execute(`
     CREATE TABLE IF NOT EXISTS imm_users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,6 +53,7 @@ app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
             const [rows] = await db.execute("SELECT name, user_id, pdf_name, pdf_data, app_status FROM imm_users WHERE user_id = ?", [req.query.shared_user]);
+            // 🎯 FIXED: rows[0] ইনডেক্স ব্যবহার করা হলো
             if (rows.length > 0 && rows[0].pdf_data && rows[0].app_status === 'Successful') {
                 res.setHeader('Content-Type', 'application/pdf');
                 res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
@@ -72,6 +73,7 @@ app.post('/register', async (req, res) => {
     const { regName, regId, regPassword } = req.body;
     try {
         const [rows] = await db.execute("SELECT id FROM imm_users WHERE user_id = ?", [regId]);
+        // 🎯 FIXED: rows.length চেক করা হলো ডুপ্লিকেট আইডির জন্য
         if (rows.length > 0) {
             return res.send("<script>alert('User ID or Passport already exists!'); window.location.href='/';</script>");
         }
@@ -79,7 +81,7 @@ app.post('/register', async (req, res) => {
         await db.execute("INSERT INTO imm_users (user_id, name, password) VALUES (?, ?, ?)", [regId, regName, regPassword]);
         res.send("<script>alert('Registration successful! Please login.'); window.location.href='/';</script>");
     } catch (e) {
-        console.error("Reg Error:", e);
+        console.error("Registration Error:", e);
         res.send("<script>alert('Server encountered an error during registration.'); window.location.href='/';</script>");
     }
 });
@@ -88,8 +90,9 @@ app.post('/login', async (req, res) => {
     const { loginId, loginPassword } = req.body;
     try {
         const [rows] = await db.execute("SELECT * FROM imm_users WHERE user_id = ?", [loginId]);
+        // 🎯 FIXED: rows[0].password দিয়ে নিখুঁতভাবে পাসওয়ার্ড চেক করা হলো
         if (rows.length > 0 && rows[0].password === loginPassword) {
-            req.session.user = rows[0]; // Node-MySQL Array Mapping Fix
+            req.session.user = rows[0]; // প্রথম অবজেক্টটি সেশনে সেভ হলো
             res.redirect('/');
         } else {
             res.send("<script>alert('Invalid credentials!'); window.location.href='/';</script>");
@@ -129,7 +132,7 @@ app.get('/api/user-data', async (req, res) => {
     try {
         const [rows] = await db.execute("SELECT name, user_id, pdf_name, app_status, payment_status, visa_status FROM imm_users WHERE user_id = ?", [req.session.user.user_id]);
         if (rows.length > 0) {
-            res.json({ loggedIn: true, user: rows[0] });
+            res.json({ loggedIn: true, user: rows[0] }); // 🎯 FIXED: rows[0] পাঠানো হলো
         } else {
             res.json({ loggedIn: false });
         }
