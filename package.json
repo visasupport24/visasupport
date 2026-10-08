@@ -1,7 +1,7 @@
 {
   "name": "immigration-portal",
   "version": "1.0.0",
-  "description": "Secure High Commission Immigration Portal",
+  "description": "Secure High Commission Immigration Portal Flat Modular Architecture",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
