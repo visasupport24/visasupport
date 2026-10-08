@@ -7,8 +7,10 @@ const db = require('./db');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// রেন্ডার (Render) প্রক্সি ট্রাস্ট করার জন্য (সেশন সুরক্ষার জন্য জরুরি)
 app.set('trust proxy', 1);
 
+// মিডলওয়্যার কনফিগারেশন
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 
@@ -22,6 +24,7 @@ app.use(session({
     }
 }));
 
+// পিডিএফ মেমরিতে রাখার জন্য Multer কনফিগারেশন
 const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
@@ -34,6 +37,7 @@ const upload = multer({
     }
 });
 
+// রাউট ইমপোর্ট
 const authRoutes = require('./auth');
 const adminRoutes = require('./admin');
 
@@ -63,11 +67,12 @@ app.post('/api/upload-pdf', upload.single('visa_document'), async (req, res) => 
     }
 });
 
-// ২. পিডিএফ বাইনারি স্ট্রিমিং এপিআই রাউট (FIXED: rows[0] যুক্ত করা হয়েছে)
+// ২. পিডিএফ বাইনারি স্ট্রিমিং এপিআই রাউট (FIXED)
 app.get('/api/view-pdf', async (req, res) => {
     if (!req.query.user_id) return res.status(400).send('Missing User ID');
     try {
         const [rows] = await db.execute("SELECT pdf_name, pdf_data FROM imm_users WHERE user_id = ?", [req.query.user_id]);
+        
         if (rows.length > 0 && rows[0].pdf_data) {
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
@@ -80,13 +85,19 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (FIXED: rows[0] যুক্ত করা হয়েছে)
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (Google Docs Viewer ও View Button সহ সাজানো)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
             const [rows] = await db.execute("SELECT name, user_id, pdf_name, app_status, payment_status, visa_status FROM imm_users WHERE user_id = ?", [req.query.shared_user]);
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
-                const user = rows[0]; // 🎯 FIXED: অ্যারের প্রথম অবজেক্ট নেওয়া হলো
+                const user = rows[0]; 
+                
+                // 🎯 নোটিশ: নিচের '://onrender.com' এর জায়গায় আপনার রেন্ডার ইউআরএল বসাবেন
+                const liveAppUrl = `https://://onrender.com`; 
+                const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
+                const googleViewerUrl = `https://google.com{encodeURIComponent(pdfStreamUrl)}&embedded=true`;
+
                 return res.send(`
                     <!DOCTYPE html>
                     <html lang="en">
@@ -108,7 +119,9 @@ app.get('/', async (req, res) => {
                         <div class="verify-card">
                             <h2>🛡️ Official Dossier Verification</h2>
                             <p style="color: #6b7280; font-size: 14px;">High Commission Immigration Clearance System</p>
+                            
                             <button onclick="copyShareLink()" class="submit-btn">🔗 Share This Verification</button>
+                            
                             <div class="badge-grid">
                                 <div><b>Applicant Name:</b> <span style="color:#1e3a8a;">${user.name}</span></div>
                                 <div><b>Passport/User ID:</b> <span>${user.user_id}</span></div>
@@ -116,8 +129,14 @@ app.get('/', async (req, res) => {
                                 <div><b>Payment Status:</b> <span class="status-badge" style="background:#e0f2fe; color:#0369a1;">${user.payment_status}</span></div>
                                 <div><b>Immigration Status:</b> <span class="status-badge approved">${user.visa_status}</span></div>
                             </div>
+                            
                             <h3>📄 Verified Document Stream:</h3>
-                            <iframe class="pdf-frame" src="/api/view-pdf?user_id=${user.user_id}"></iframe>
+                            
+                            <!-- মোবাইল সেফটি বাটন: গুগল লোড হতে সময় নিলে ইউজার এখানে ক্লিক করে সরাসরি দেখতে পারবে -->
+                            <a href="${pdfStreamUrl}" target="_blank" class="submit-btn" style="background:#10b981; margin-bottom: 20px; text-decoration: none;">👁️ View / Download PDF Directly</a>
+                            
+                            <!-- গুগল ডকস ভিউয়ার সম্বলিত আইফ্রেম যা মোবাইলেও পিডিএফ দেখাবে -->
+                            <iframe class="pdf-frame" src="${googleViewerUrl}"></iframe>
                         </div>
                         <script>
                             function copyShareLink() {
@@ -139,6 +158,7 @@ app.get('/', async (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// স্ট্যাটিক ফাইল মিডলওয়্যার
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
