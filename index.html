@@ -102,7 +102,7 @@
         if(tabName === 'admin') fetchAdminData();
     }
 
-    async function checkSession() {
+        async function checkSession() {
         const res = await fetch('/api/user-data');
         const data = await res.json();
         if (data.loggedIn) {
@@ -118,10 +118,12 @@
                     <p style="margin: 8px 0;"><b>4. Visa Immigration Status:</b> <span class="status-badge ${data.user.visa_status.toLowerCase()}">${data.user.visa_status}</span></p>
                 `;
                 if(data.user.app_status === 'Successful') {
+                    // 🎯 এখানে নতুন ভেরিফিকেশন ভিউ পেজের বাটনটি যুক্ত হলো
                     document.getElementById('statusDetails').innerHTML += `
-                        <div class="share-box">
-                            <h4 style="margin:0 0 5px 0; color:#065f46;">🔒 Share Verification Path</h4>
-                            <input type="text" class="share-link" readonly onclick="this.select()" value="${window.location.origin}/?shared_user=${data.user.user_id}">
+                        <div class="share-box" style="background: #ecfdf5; border: 1px dashed #10b981; padding: 15px; margin-top: 15px; border-radius: 6px; text-align: center;">
+                            <h4 style="margin:0 0 5px 0; color:#065f46;">🔒 Security Verification Path Activated</h4>
+                            <p style="font-size:12.5px; margin:0 0 12px 0; color:#065f46;">Your application is <b>Successful</b>. Access the digital clearance dossier page:</p>
+                            <a href="/?shared_user=${data.user.user_id}" target="_blank" style="display: inline-block; background: #10b981; color: white; padding: 10px 22px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">📄 View Full PDF Document</a>
                         </div>`;
                 }
             } else {
@@ -129,6 +131,7 @@
             }
         }
     }
+
 
     function verifyAdminKey() {
         if (document.getElementById('adminSecretKey').value === "Admin@123") {
