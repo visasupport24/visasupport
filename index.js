@@ -10,7 +10,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: 'imm-secure-gateway-2026',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // সেশন টাইমআউট লক করা হলো
 }));
 
 app.use(express.static(__dirname));
@@ -20,6 +21,7 @@ const adminRoutes = require('./admin');
 app.use('/', authRoutes);
 app.use('/', adminRoutes);
 
+// পিডিএফ বাইনারি স্ট্রিমিং এপিআই রাউট
 app.get('/api/view-pdf', async (req, res) => {
     if (!req.query.user_id) return res.status(400).send('Missing User ID');
     try {
@@ -35,12 +37,13 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
+// শেয়ার্ড ভেরিফিকেশন গেটওয়ে
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
             const [rows] = await db.execute("SELECT name, user_id, pdf_name, app_status, payment_status, visa_status FROM imm_users WHERE user_id = ?", [req.query.shared_user]);
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
-                const user = rows[0]; // 🎯 FIXED: rows[0] নির্দিষ্ট করা হলো
+                const user = rows[0]; 
                 return res.send(`
                     <!DOCTYPE html>
                     <html lang="en">
