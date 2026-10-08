@@ -8,12 +8,13 @@ const pool = mysql.createPool({
     port: process.env.DB_PORT || 23643,
     ssl: { rejectUnauthorized: false }, 
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 5, // 🎯 FIXED: মেমোরি বাঁচাতে কানেকশন লিমিট ১০ থেকে কমিয়ে ৫ করা হলো
     queueLimit: 0
 });
 
 const db = pool.promise();
 
+// টেবিল অটো-ইনিশিয়ালাইজেশন (লাইটওয়েট ইভেন্ট হ্যান্ডলিং)
 db.execute(`
     CREATE TABLE IF NOT EXISTS imm_users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -26,8 +27,6 @@ db.execute(`
         payment_status VARCHAR(50) DEFAULT 'Not Paid',
         visa_status VARCHAR(20) DEFAULT 'Pending'
     )
-`)
-.then(() => console.log("🔒 Cloud Database Synchronized Successfully."))
-.catch(err => console.error("❌ Database sync failed:", err));
+`).catch(err => console.error("Database sync failed:", err));
 
 module.exports = db;
