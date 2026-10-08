@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Commission Chek Immigration</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; color: #1f2937; display: flex; flex-direction: column; min-height: 100vh; }
+        .main-content { flex: 1; padding: 20px; }
+        .container { max-width: 750px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 20px auto; }
+        h1, h2, h3 { text-align: center; color: #0b2545; margin-bottom: 5px; }
+        .nav-tabs { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; }
+        .tab-btn { background-color: #f3f4f6; border: 1px solid #d1d5db; padding: 12px 20px; font-size: 15px; cursor: pointer; font-weight: bold; color: #4b5563; border-radius: 6px; flex: 1; min-width: 140px; text-align: center; transition: 0.2s; }
+        .tab-btn.active { color: #ffffff; background-color: #1e3a8a; border-color: #1e3a8a; }
+        .section { display: none; }
+        .section.active { display: block; }
+        label { font-weight: 600; display: block; margin-top: 15px; color: #374151; }
+        input, select { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        button.submit-btn, .link-btn { background-color: #1e3a8a; color: white; border: none; padding: 12px; margin-top: 20px; cursor: pointer; border-radius: 6px; width: 100%; font-size: 16px; font-weight: bold; text-align:center; text-decoration:none; display:block; box-sizing: border-box; }
+        button.submit-btn:hover, .link-btn:hover { background-color: #1d4ed8; }
+        .status-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; margin-top: 20px; border-radius: 8px; }
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; text-transform: uppercase; }
+        .pending { background: #fef3c7; color: #d97706; }
+        .successful, .approved { background: #dcfce7; color: #16a34a; }
+        .rejected { background: #fee2e2; color: #dc2626; }
+        .share-box { background: #ecfdf5; border: 1px dashed #10b981; padding: 15px; margin-top: 15px; border-radius: 6px; }
+        .share-link { width: 100%; padding: 8px; background: white; border: 1px solid #a7f3d0; border-radius: 4px; font-family: monospace; font-size: 12px; margin-top: 5px; box-sizing: border-box; }
+        .app-list-item { background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 15px; border-radius: 8px; }
+        .admin-auth-box { max-width: 400px; margin: 30px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; text-align: center; }
+        .site-footer { background-color: #0b2545; color: #ffffff; padding: 40px 20px 20px 20px; margin-top: 50px; font-size: 14px; }
+        .footer-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; }
+        .footer-brand h2 { color: #ffffff; text-align: left; margin: 0 0 5px 0; font-size: 22px; }
+        .footer-brand p { color: #cbd5e1; line-height: 1.6; font-size: 13px; }
+        .social-icons { display: flex; gap: 12px; margin-top: 15px; }
+        .social-icons a { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255,255,255,0.08); color: #fff; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 15px; }
+        .footer-column h3 { color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
+        .footer-links { list-style: none; padding: 0; margin: 0; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a { color: #cbd5e1; text-decoration: none; font-size: 13px; }
+        .footer-bottom { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 13px; }
+        @media (max-width: 600px) { .nav-tabs { flex-direction: column; } .tab-btn { width: 100%; } }
+    </style>
+</head>
+<body>
+
+<div class="main-content">
+    <div class="container">
+        <h1>High Commission Chek Immigration</h1>
+        <p style="text-align: center; color: #6b7280; margin-top: -5px; font-size: 14px;">Secure Application Tracking Gateway</p>
+        
+        <div class="nav-tabs">
+            <button class="tab-btn active" id="btn-register" onclick="switchTab('register')">📝 Registration</button>
+            <button class="tab-btn" id="btn-login" onclick="switchTab('login')">🔑 User Login</button>
+            <button class="tab-btn" id="btn-admin" onclick="switchTab('admin')">👑 Admin Panel</button>
+        </div>
+
+        <div id="registerSection" class="section active">
+            <h2>Account Registration</h2>
+            <form action="/register" method="POST">
+                <label>Full Name:</label>
+                <input type="text" name="regName" required placeholder="e.g., John Doe">
+                <label>User ID / Passport Number:</label>
+                <input type="text" name="regId" required placeholder="Enter unique ID or Passport No">
+                <label>Password:</label>
+                <input type="password" name="regPassword" required placeholder="••••••••">
+                <button type="submit" class="submit-btn">Register Account</button>
+            </form>
+        </div>
+
+        <div id="loginSection" class="section">
+            <h2>User Login</h2>
+            <div id="loginFormArea">
+                <form action="/login" method="POST">
+                    <label>User ID / Passport No:</label>
+                    <input type="text" name="loginId" required placeholder="Enter your registered ID">
+                    <label>Password:</label>
+                    <input type="password" name="loginPassword" required placeholder="••••••••">
+                    <button type="submit" class="submit-btn">Secure Login</button>
+                </form>
+            </div>
+            <div id="userDashboard" style="display:none;">
+                <h3 id="welcomeMsg"></h3>
+                <hr>
+                <div style="background: #f3f4f6; padding: 18px; border-radius: 8px; margin-bottom: 15px;">
+                    <h4>1. Submit Application</h4>
+                    <form action="/upload" method="POST" enctype="multipart/form-data">
+                        <label>Upload Document Copy (PDF only, max 50MB):</label>
+                        <input type="file" name="pdfFile" accept="application/pdf" required>
+                        <button type="submit" class="submit-btn" style="background:#2563eb;">Upload & Submit</button>
+                    </form>
+                </div>
+                <div class="status-box">
+                    <h4>Portal Verification Specifications</h4>
+                    <div id="statusDetails"></div>
+                </div>
+                <a href="/logout" class="link-btn" style="background-color: #6b7280; margin-top:15px;">End Session (Logout)</a>
+            </div>
+        </div>
+
+        <div id="adminSection" class="section">
+            <div id="adminAuth" class="admin-auth-box">
+                <h3>👑 Staff Entry Protection</h3>
+                <input type="password" id="adminSecretKey" placeholder="Enter Secure Pin">
+                <button class="submit-btn" onclick="verifyAdminKey()">Authorize Panel</button>
+            </div>
+            <div id="adminContent" style="display: none;">
+                <h2>Administrative Dossier Overview</h2>
+                <div id="adminAppList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="site-footer">
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <h2>High Commission</h2>
+            <p>Your trusted partner for visa and immigration services since 2009.</p>
+        </div>
+        <div class="footer-column"><h3>Quick Links</h3><ul class="footer-links"><li><a href="#">Home</a></li><li><a href="#">Visa Types</a></li></ul></div>
+        <div class="footer-column"><h3>Visa Services</h3><ul class="footer-links"><li><a href="#">Tourist Visa</a></li><li><a href="#">Work Visa</a></li></ul></div>
+        <div class="footer-column"><h3>Facilities</h3><ul class="footer-links"><li><a href="#">Farm Work</a></li><li><a href="#">Factory</a></li></ul></div>
+        <div class="footer-column"><h3>Legal</h3><ul class="footer-links"><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 High Commission. All rights reserved.</div>
+</footer>
+
+<script>
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('btn-' + tabName).classList.add('active');
+        document.getElementById(tabName + 'Section').classList.add('active');
+        if(tabName === 'admin') fetchAdminData();
+    }
+
+    async function checkSession() {
+        const res = await fetch('/api/user-data');
+        const data = await res.json();
+        if (data.loggedIn) {
+            document.getElementById('loginFormArea').style.display = 'none';
+            document.getElementById('userDashboard').style.display = 'block';
+            document.getElementById('welcomeMsg').innerText = `Welcome, ${data.user.name}`;
+            
+            if(data.user.pdf_name) {
+                document.getElementById('statusDetails').innerHTML = `
+                    <p><b>File:</b> ${data.user.pdf_name}</p>
+                    <p><b>Status:</b> <span class="status-badge ${data.user.app_status.toLowerCase()}">${data.user.app_status}</span></p>
+                    <p><b>Payment:</b> <span class="status-badge" style="background:#e0f2fe; color:#0369a1;">${data.user.payment_status}</span></p>
+                    <p><b>Visa Status:</b> <span class="status-badge ${data.user.visa_status.toLowerCase()}">${data.user.visa_status}</span></p>
+                `;
+                if(data.user.app_status === 'Successful') {
+                    document.getElementById('statusDetails').innerHTML += `
+                        <div class="share-box">
+                            <h4>🔒 Share Verification Path</h4>
+                            <input type="text" class="share-link" readonly onclick="this.select()" value="${window.location.origin}/?shared_user=${data.user.user_id}">
+                        </div>`;
+                }
+            } else {
+                document.getElementById('statusDetails').innerHTML = '<p>No applications uploaded yet.</p>';
+            }
+        }
+    }
+
+    function verifyAdminKey() {
+        if (document.getElementById('adminSecretKey').value === "Admin@123") {
+            document.getElementById('adminAuth').style.display = 'none';
+            document.getElementById('adminContent').style.display = 'block';
+        } else { alert('Access Denied!'); }
+    }
+
+    async function fetchAdminData() {
+        const res = await fetch('/api/admin-data');
+        const list = await res.json();
+        const container = document.getElementById('adminAppList');
+        container.innerHTML = '';
+        list.forEach(row => {
+            container.innerHTML += `
+                <div class="app-list-item">
+                    <strong>Name:</strong> ${row.name} | <strong>ID:</strong> ${row.user_id}<br>
+                    <form action="/admin-update" method="POST">
+                        <input type="hidden" name="target_user_id" value="${row.user_id}">
+                        <select name="new_app_status">
+                            <option value="Pending" ${row.app_status==='Pending'?'selected':''}>Pending</option>
+                            <option value="Successful" ${row.app_status==='Successful'?'selected':''}>Successful</option>
+                        </select>
+                        <input type="text" name="new_payment" value="${row.payment_status}">
+                        <select name="new_visa">
+                            <option value="Pending" ${row.visa_status==='Pending'?'selected':''}>Pending</option>
+                            <option value="Approved" ${row.visa_status==='Approved'?'selected' :''}>Approved</option>
+                        </select>
+                        <button type="submit">Apply</button>
+                    </form>
+                </div>`;
+        });
+    }
+    window.onload = checkSession;
+</script>
+</body>
+</html>
+
