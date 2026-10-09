@@ -88,12 +88,11 @@ app.get('/', async (req, res) => {
             const [rows] = await db.execute("SELECT name, user_id, pdf_name, app_status, payment_status, visa_status FROM imm_users WHERE user_id = ?", [req.query.shared_user]);
             
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
-                const user = rows[0]; // 🎯 ফিক্সড: অ্যারের প্রথম অবজেক্ট নেওয়া হলো
+                const user = rows[0]; 
                 
+                // 🎯 FIXED: আপনার লাইভ রেন্ডার লিংকের সাথে ১০০% ম্যাচ করা হলো
                 const liveAppUrl = `https://high-commissioncheck-immi.onrender.com`; 
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
-                
-                // 🎯 ফিক্সড: গুগল ভিউয়ারের আসল স্ট্রাকচারড লিংক
                 const googleViewerUrl = `https://google.com{encodeURIComponent(pdfStreamUrl)}&embedded=true`;
 
                 return res.send(`
@@ -130,8 +129,10 @@ app.get('/', async (req, res) => {
                             
                             <h3>📄 Verified Document Stream:</h3>
                             
+                            <!-- ভিউ বাটন যা সরাসরি ডাউনলোড করার ব্যাকআপ অপশন দিবে -->
                             <a href="${pdfStreamUrl}" target="_blank" class="submit-btn" style="background:#10b981; margin-bottom: 20px; text-decoration: none;">👁️ View / Download PDF Directly</a>
                             
+                            <!-- ফিক্সড গুগল ভিউয়ার সমৃদ্ধ আইফ্রেম -->
                             <iframe class="pdf-frame" src="${googleViewerUrl}"></iframe>
                         </div>
                         <script>
