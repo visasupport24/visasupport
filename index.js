@@ -90,7 +90,8 @@ app.get('/', async (req, res) => {
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; 
                 
-                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com/`; 
+                // 🎯 FIXED: ইউআরএল-এর শেষের বাড়তি স্ল্যাশ (/) মুছে ফেলা হলো ডবল স্ল্যাশ এড়াতে
+                const liveAppUrl = `https://onrender.com`; 
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
 
                 return res.send(`
@@ -126,7 +127,6 @@ app.get('/', async (req, res) => {
                             
                             <h3>📄 Verified Document Stream:</h3>
                             
-                            <!-- প্রফেশনাল ভিউ বাটন যা সরাসরি ফুল স্ক্রিনে পিডিএফ ওপেন করবে -->
                             <a href="${pdfStreamUrl}" target="_blank" class="submit-btn" style="background:#10b981; margin-bottom: 20px; text-decoration: none;">👁️ View Verified PDF Document</a>
                         </div>
                         <script>
