@@ -93,7 +93,7 @@ app.get('/', async (req, res) => {
                 const user = rows[0]; 
                 
                 // 🚀 ফিক্সড ইউআরএল লজিক
-                const liveAppUrl = `https://onrender.com`; 
+                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com`; 
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
                 const googleViewerUrl = `https://google.com{encodeURIComponent(pdfStreamUrl)}&embedded=true`;
 
