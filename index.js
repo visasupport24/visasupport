@@ -85,7 +85,6 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (Google Docs Viewer ও View Button সহ সাজানো)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
@@ -93,8 +92,8 @@ app.get('/', async (req, res) => {
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; 
                 
-                // 🎯 নোটিশ: নিচের '://onrender.com' এর জায়গায় আপনার রেন্ডার ইউআরএল বসাবেন
-                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com`; 
+                // 🚀 ফিক্সড ইউআরএল লজিক
+                const liveAppUrl = `https://onrender.com`; 
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
                 const googleViewerUrl = `https://google.com{encodeURIComponent(pdfStreamUrl)}&embedded=true`;
 
@@ -132,10 +131,8 @@ app.get('/', async (req, res) => {
                             
                             <h3>📄 Verified Document Stream:</h3>
                             
-                            <!-- মোবাইল সেফটি বাটন: গুগল লোড হতে সময় নিলে ইউজার এখানে ক্লিক করে সরাসরি দেখতে পারবে -->
                             <a href="${pdfStreamUrl}" target="_blank" class="submit-btn" style="background:#10b981; margin-bottom: 20px; text-decoration: none;">👁️ View / Download PDF Directly</a>
                             
-                            <!-- গুগল ডকস ভিউয়ার সম্বলিত আইফ্রেম যা মোবাইলেও পিডিএফ দেখাবে -->
                             <iframe class="pdf-frame" src="${googleViewerUrl}"></iframe>
                         </div>
                         <script>
