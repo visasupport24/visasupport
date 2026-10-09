@@ -90,7 +90,7 @@ app.get('/', async (req, res) => {
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; // 🎯 ফিক্সড: অ্যারের প্রথম অবজেক্ট নেওয়া হলো
                 
-                const liveAppUrl = `https://onrender.com`; 
+                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com`; 
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
                 
                 // 🎯 ফিক্সড: গুগল ভিউয়ারের আসল স্ট্রাকচারড লিংক
