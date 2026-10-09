@@ -91,7 +91,7 @@ app.get('/', async (req, res) => {
                 const user = rows[0]; 
                 
                 // 🎯 FIXED: ইউআরএল-এর শেষের বাড়তি স্ল্যাশ (/) মুছে ফেলা হলো ডবল স্ল্যাশ এড়াতে
-                const liveAppUrl = `https://onrender.com`; 
+                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com/`; 
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
 
                 return res.send(`
