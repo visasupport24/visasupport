@@ -90,8 +90,11 @@ app.get('/', async (req, res) => {
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; 
                 
-                // 🎯 FIXED: ইউআরএল-এর শেষের বাড়তি স্ল্যাশ (/) মুছে ফেলা হলো ডবল স্ল্যাশ এড়াতে
-                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com/`; 
+                // 🎯 ডবল স্ল্যাশ এরর এড়াতে ইউআরএল এর শেষের স্ল্যাশ বাদ দিয়ে প্রফেশনাল এনভায়রনমেন্ট লজিক
+                const liveAppUrl = process.env.NODE_ENV === 'production' 
+                    ? `https://${process.env.RENDER_EXTERNAL_URL.replace(/^https?:\/\//, '')}` 
+                    : `http://localhost:${port}`;
+
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
 
                 return res.send(`
@@ -127,6 +130,7 @@ app.get('/', async (req, res) => {
                             
                             <h3>📄 Verified Document Stream:</h3>
                             
+                            <!-- প্রফেশনাল ভিউ বাটন যা সরাসরি ফুল স্ক্রিনে পিডিএফ ওপেন করবে (সাদা বক্স সম্পূর্ণ বাদ) -->
                             <a href="${pdfStreamUrl}" target="_blank" class="submit-btn" style="background:#10b981; margin-bottom: 20px; text-decoration: none;">👁️ View Verified PDF Document</a>
                         </div>
                         <script>
