@@ -90,10 +90,8 @@ app.get('/', async (req, res) => {
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; 
                 
-                // 🎯 FIXED: আপনার লাইভ রেন্ডার লিংকের সাথে ১০০% ম্যাচ করা হলো
-                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com`; 
+                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com/`; 
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
-                const googleViewerUrl = `https://google.com{encodeURIComponent(pdfStreamUrl)}&embedded=true`;
 
                 return res.send(`
                     <!DOCTYPE html>
@@ -109,7 +107,6 @@ app.get('/', async (req, res) => {
                             .badge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 25px 0; text-align: left; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; }
                             .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
                             .successful, .approved { background: #dcfce7; color: #16a34a; }
-                            .pdf-frame { width: 100%; height: 600px; border: 1px solid #d1d5db; border-radius: 8px; margin-top: 20px; box-sizing: border-box; }
                         </style>
                     </head>
                     <body>
@@ -129,11 +126,8 @@ app.get('/', async (req, res) => {
                             
                             <h3>📄 Verified Document Stream:</h3>
                             
-                            <!-- ভিউ বাটন যা সরাসরি ডাউনলোড করার ব্যাকআপ অপশন দিবে -->
-                            <a href="${pdfStreamUrl}" target="_blank" class="submit-btn" style="background:#10b981; margin-bottom: 20px; text-decoration: none;">👁️ View / Download PDF Directly</a>
-                            
-                            <!-- ফিক্সড গুগল ভিউয়ার সমৃদ্ধ আইফ্রেম -->
-                            <iframe class="pdf-frame" src="${googleViewerUrl}"></iframe>
+                            <!-- প্রফেশনাল ভিউ বাটন যা সরাসরি ফুল স্ক্রিনে পিডিএফ ওপেন করবে -->
+                            <a href="${pdfStreamUrl}" target="_blank" class="submit-btn" style="background:#10b981; margin-bottom: 20px; text-decoration: none;">👁️ View Verified PDF Document</a>
                         </div>
                         <script>
                             function copyShareLink() {
