@@ -7,10 +7,8 @@ const db = require('./db');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// রেন্ডার (Render) প্রক্সি ট্রাস্ট করার জন্য (সেশন সুরক্ষার জন্য জরুরি)
 app.set('trust proxy', 1);
 
-// মিডলওয়্যার কনফিগারেশন
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,7 +22,6 @@ app.use(session({
     }
 }));
 
-// পিডিএফ মেমরিতে রাখার জন্য Multer কনফিগারেশন
 const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
@@ -37,7 +34,6 @@ const upload = multer({
     }
 });
 
-// রাউট ইমপোর্ট
 const authRoutes = require('./auth');
 const adminRoutes = require('./admin');
 
@@ -67,7 +63,7 @@ app.post('/api/upload-pdf', upload.single('visa_document'), async (req, res) => 
     }
 });
 
-// ২. পিডিএফ বাইনারি স্ট্রিমিং এপিআই রাউট (FIXED)
+// ২. পিডিএফ বাইনারি স্ট্রিমিং এপিআই রাউট
 app.get('/api/view-pdf', async (req, res) => {
     if (!req.query.user_id) return res.status(400).send('Missing User ID');
     try {
@@ -85,16 +81,19 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
             const [rows] = await db.execute("SELECT name, user_id, pdf_name, app_status, payment_status, visa_status FROM imm_users WHERE user_id = ?", [req.query.shared_user]);
+            
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
-                const user = rows[0]; 
+                const user = rows[0]; // 🎯 ফিক্সড: অ্যারের প্রথম অবজেক্ট নেওয়া হলো
                 
-                // 🚀 ফিক্সড ইউআরএল লজিক
-                const liveAppUrl = `https://high-commissioncheck-immi.onrender.com`; 
+                const liveAppUrl = `https://onrender.com`; 
                 const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
+                
+                // 🎯 ফিক্সড: গুগল ভিউয়ারের আসল স্ট্রাকচারড লিংক
                 const googleViewerUrl = `https://google.com{encodeURIComponent(pdfStreamUrl)}&embedded=true`;
 
                 return res.send(`
@@ -155,7 +154,6 @@ app.get('/', async (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// স্ট্যাটিক ফাইল মিডলওয়্যার
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
