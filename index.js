@@ -63,23 +63,24 @@ app.post('/api/upload-pdf', upload.single('visa_document'), async (req, res) => 
     }
 });
 
-// ২. পিডিএফ বাইনারি স্ট্রিমিং এপিআই রাউট
+// ২. পিডিএফ রিডাইরেকশন এপিআই রাউট (ডাটাবেজ ও সার্ভারের ওপর চাপ মুক্ত)
 app.get('/api/view-pdf', async (req, res) => {
     if (!req.query.user_id) return res.status(400).send('Missing User ID');
     try {
-        const [rows] = await db.execute("SELECT pdf_name, pdf_data FROM imm_users WHERE user_id = ?", [req.query.user_id]);
+        // ডাটাবেজ থেকে পিডিএফ-এর ক্লাউড লিংকটি তুলে আনা
+        const [rows] = await db.execute("SELECT pdf_url FROM imm_users WHERE user_id = ?", [req.query.user_id]);
         
-        if (rows.length > 0 && rows[0].pdf_data) {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
-            return res.send(rows[0].pdf_data);
+        if (rows.length > 0 && rows[0].pdf_url) {
+            // সরাসরি গুগল ড্রাইভ বা ড্রপবক্সের লিংকে রিডাইরেক্ট করা
+            return res.redirect(rows[0].pdf_url);
         }
-        res.status(404).send('PDF Data Not Found');
+        res.status(404).send('PDF Link Not Found in Database');
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 // ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (Australian ImmiAccount / VEVO Theme)
 app.get('/', async (req, res) => {
