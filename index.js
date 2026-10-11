@@ -182,7 +182,7 @@ app.get('/', async (req, res) => {
                             <div class="footer-bottom">&copy; 2026 Department of Home Affairs. All rights reserved.</div>
                         </footer>
 
-                        <script>
+                                                <script>
                             function copyShareLink() {
                                 navigator.clipboard.writeText(window.location.href);
                                 var toast = document.getElementById("toast-msg");
@@ -190,10 +190,10 @@ app.get('/', async (req, res) => {
                                 setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
                             }
 
-                                                        function toggleSecurePdf() {
+                            function toggleSecurePdf() {
                                 var pdfBox = document.getElementById("securePdfBox");
                                 var container = document.getElementById('pdf-viewer-container');
-                                var pdfUrl = "` + pdfStreamUrl + `#toolbar=0&navpanes=0";
+                                var pdfUrl = "` + pdfStreamUrl + `#toolbar=0&navpanes=0&statusbar=0&messages=0";
                                 
                                 if (pdfBox.style.display === "block") {
                                     pdfBox.style.display = "none";
@@ -201,7 +201,12 @@ app.get('/', async (req, res) => {
                                     pdfBox.style.display = "block";
                                     pdfBox.scrollIntoView({ behavior: 'smooth' });
                                     
-                                    container.innerHTML = '<iframe src="' + pdfUrl + '" style="width:100%; height:500px; border:none;"></iframe>';
+                                    // 🎯 ফিক্স: Render-এর iframe রিফিউজ এরর দূর করতে মডার্ন এমবেড অবজেক্ট মেথড
+                                    container.innerHTML = `
+                                        <object data="` + pdfUrl + `" type="application/pdf" style="width:100%; height:500px;">
+                                            <embed src="` + pdfUrl + `" type="application/pdf" style="width:100%; height:500px;" />
+                                        </object>
+                                    `;
                                 }
                             }
 
@@ -229,4 +234,3 @@ app.get('/', async (req, res) => {
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
-
