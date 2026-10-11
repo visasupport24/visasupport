@@ -164,9 +164,11 @@ app.get('/', async (req, res) => {
                                 </div>
                             </div>
 
-                            <div id="securePdfBox" class="secure-pdf-container">
+                                                        <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <div id="pdf-viewer-container"></div>
+                                <div id="pdf-viewer-container" style="width: 100%; height: 500px; overflow-y: auto; background: #525659; padding: 10px 0; box-sizing: border-box;">
+                                    <div id="loading-text" style="color: white; text-align: center; padding: 20px; font-weight: bold;">Loading Document Securely...</div>
+                                </div>
                             </div>
                         </div>
 
@@ -182,7 +184,11 @@ app.get('/', async (req, res) => {
                             <div class="footer-bottom">&copy; 2026 Department of Home Affairs. All rights reserved.</div>
                         </footer>
 
+                        <!-- PDF.js কোর লাইব্রেরি স্ক্রিপ্ট ইনজেকশন -->
+                        <script src="https://cloudflare.com"></script>
                         <script>
+                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cloudflare.com';
+
                             function copyShareLink() {
                                 navigator.clipboard.writeText(window.location.href);
                                 var toast = document.getElementById("toast-msg");
@@ -190,10 +196,10 @@ app.get('/', async (req, res) => {
                                 setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
                             }
 
-                                                        function toggleSecurePdf() {
+                            var isPdfLoaded = false;
+                            function toggleSecurePdf() {
                                 var pdfBox = document.getElementById("securePdfBox");
-                                var container = document.getElementById('pdf-viewer-container');
-                                var pdfUrl = "` + pdfStreamUrl + `#toolbar=0&navpanes=0&statusbar=0&messages=0";
+                                var pdfUrl = "` + pdfStreamUrl + `";
                                 
                                 if (pdfBox.style.display === "block") {
                                     pdfBox.style.display = "none";
@@ -201,8 +207,58 @@ app.get('/', async (req, res) => {
                                     pdfBox.style.display = "block";
                                     pdfBox.scrollIntoView({ behavior: 'smooth' });
                                     
-                                    container.innerHTML = '<object data="' + pdfUrl + '" type="application/pdf" style="width:100%; height:500px;"><embed src="' + pdfUrl + '" type="application/pdf" style="width:100%; height:500px;" /></object>';
+                                    if (!isPdfLoaded) {
+                                        loadSecurePdf(pdfUrl);
+                                    }
                                 }
+                            }
+
+                            // 🎯 ডাইরেক্ট এরে বাফার দিয়ে পিডিএফ পেজ ক্যানভাসে ছবি আকারে রেন্ডার করার লজিক
+                            function loadSecurePdf(url) {
+                                var container = document.getElementById('pdf-viewer-container');
+                                
+                                fetch(url)
+                                    .then(res => {
+                                        if(!res.ok) throw new Error("HTTP error");
+                                        return res.arrayBuffer();
+                                    })
+                                    .then(buffer => {
+                                        var typedArray = new Uint8Array(buffer);
+                                        return pdfjsLib.getDocument({ data: typedArray }).promise;
+                                    })
+                                    .then(function(pdf) {
+                                        document.getElementById('loading-text').style.display = 'none';
+                                        isPdfLoaded = true;
+                                        
+                                        // প্রতিটি পেজকে লুপ করে ছবির (Canvas) মতো স্ক্রিনে জেনারেট করা
+                                        for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                                            pdf.getPage(pageNum).then(function(page) {
+                                                var viewport = page.getViewport({ scale: 1.2 });
+                                                var canvas = document.createElement('canvas');
+                                                canvas.style.display = 'block';
+                                                canvas.style.margin = '0 auto 10px auto';
+                                                canvas.style.maxWidth = '95%';
+                                                canvas.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+                                                canvas.style.backgroundColor = 'white';
+                                                
+                                                var context = canvas.getContext('2d');
+                                                canvas.height = viewport.height;
+                                                canvas.width = viewport.width;
+                                                container.appendChild(canvas);
+
+                                                var renderContext = {
+                                                    canvasContext: context,
+                                                    viewport: viewport
+                                                };
+                                                page.render(renderContext);
+                                            });
+                                        }
+                                    })
+                                    .catch(function(error) {
+                                        console.error("PDF Load Error: ", error);
+                                        document.getElementById('loading-text').innerText = "Failed to load document securely. Please refresh.";
+                                        document.getElementById('loading-text').style.color = "#ef4444";
+                                    });
                             }
 
                             document.addEventListener('keydown', function(e) {
@@ -229,4 +285,3 @@ app.get('/', async (req, res) => {
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
-
