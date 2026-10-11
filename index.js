@@ -175,7 +175,8 @@ app.get('/', async (req, res) => {
                             <!-- একই পেজের নিচে সুন্দর ফ্রেমের ভেতর ফাইল লক হয়ে ওপেন হবে -->
                             <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <iframe class="pdf-iframe" src="${pdfStreamUrl}#toolbar=0&navpanes=0&scrollbar=0"></iframe>
+                                <iframe class="pdf-iframe" src="https://google.com{encodeURIComponent(pdfStreamUrl)}&embedded=true"></iframe>
+
                             </div>
                         </div>
 
