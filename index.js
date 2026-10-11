@@ -69,10 +69,10 @@ app.get('/api/view-pdf', async (req, res) => {
     try {
         const [rows] = await db.execute("SELECT pdf_name, pdf_data FROM imm_users WHERE user_id = ?", [req.query.user_id]);
         
-        if (rows && rows.length > 0 && rows[0].pdf_data) {
+        if (rows && rows.length > 0 && rows.pdf_data) {
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
-            return res.send(rows[0].pdf_data);
+            res.setHeader('Content-Disposition', `inline; filename="${rows.pdf_name}"`);
+            return res.send(rows.pdf_data);
         }
         res.status(404).send('PDF Data Not Found');
     } catch (err) {
@@ -81,7 +81,7 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (সার্ভার-সাইড Base64 ইনজেকশন মেথড)
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (Base64 + PDF.js ক্যানভাস চূড়ান্ত মেথড)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
@@ -90,18 +90,14 @@ app.get('/', async (req, res) => {
                 [req.query.shared_user]
             );
             
-            // 🎯 rows[0] ব্যবহার করে অবজেক্ট ডেটা সঠিকভাবে রিড করা হলো
             if (rows && rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; 
                 
-                // 🎯 সার্ভার সাইডেই পিডিএফ বাইনারি বাফারকে Base64 স্ট্রিং-এ রূপান্তর (১০০% একুরেট সলিউশন)
+                // সার্ভার সাইডেই পিডিএফ বাইনারি বাফারকে Base64 স্ট্রিং-এ রূপান্তর
                 let pdfBase64 = "";
                 if (user.pdf_data) {
                     pdfBase64 = Buffer.from(user.pdf_data).toString('base64');
                 }
-
-                // ব্রাউজারে ইনজেক্ট করার জন্য ডাইরেক্ট ডেটা ইউআরএল জেনারেট
-                const pdfDataUrl = "data:application/pdf;base64," + pdfBase64;
 
                 return res.send(`
                     <!DOCTYPE html>
@@ -116,8 +112,17 @@ app.get('/', async (req, res) => {
                             .main-content { flex: 1; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
                             .secure-pdf-container { width: 100%; max-width: 650px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; overflow: hidden; border: 1px solid #e2e8f0; display: none; }
                             .secure-bar { background: #1e293b; color: #ef4444; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; border-bottom: 2px solid #ffc72c; }
-                            .pdf-object-frame { width: 100%; height: 500px; border: none; }
+                            
+                            /* PDF.js কন্টেইনার স্টাইল */
+                            #pdf-viewer-container { width: 100%; height: 500px; overflow-y: auto; background: #525659; padding: 10px 0; box-sizing: border-box; }
+                            .pdf-page-canvas { display: block; margin: 0 auto 10px auto; max-width: 95%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); background: white; }
+                            #loading-text { color: white; text-align: center; padding: 20px; font-weight: bold; }
                         </style>
+                        <!-- PDF.js লাইব্রেরি স্ক্রিপ্ট ইনজেকশন -->
+                        <script src="https://cloudflare.com"></script>
+                        <script>
+                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cloudflare.com';
+                        </script>
                     </head>
                     <body oncontextmenu="return false;">
                         <div class="main-content">
@@ -171,18 +176,18 @@ app.get('/', async (req, res) => {
                                 </div>
                             </div>
 
-                            <!-- ব্রাউজারের নিজস্ব প্লেয়ার কিন্তু ডাউনলোড অপশন রিমুভড প্যারামিটার সহ -->
+                                                        <!-- কাস্টম সিকিউর ক্যানভাস বক্স -->
                             <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <object class="pdf-object-frame" data="` + pdfDataUrl + `#toolbar=0&navpanes=0&statusbar=0&messages=0" type="application/pdf">
-                                    <embed src="` + pdfDataUrl + `#toolbar=0&navpanes=0&statusbar=0&messages=0" type="application/pdf" class="pdf-object-frame" />
-                                </object>
+                                <div id="pdf-viewer-container">
+                                    <div id="loading-text">Loading Document Securely...</div>
+                                </div>
                             </div>
                         </div>
 
                         <div id="toast-msg">Verification link copied to clipboard!</div>
 
-                                                <footer class="site-footer">
+                        <footer class="site-footer">
                             <div class="footer-grid">
                                 <div class="footer-brand">
                                     <h2>Australian Government</h2>
@@ -200,6 +205,9 @@ app.get('/', async (req, res) => {
                                 setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
                             }
 
+                            var isPdfLoaded = false;
+                            var rawBase64Data = "` + pdfBase64 + `";
+
                             function toggleSecurePdf() {
                                 var pdfBox = document.getElementById("securePdfBox");
                                 if (pdfBox.style.display === "block") {
@@ -207,6 +215,50 @@ app.get('/', async (req, res) => {
                                 } else {
                                     pdfBox.style.display = "block";
                                     pdfBox.scrollIntoView({ behavior: 'smooth' });
+                                    if (!isPdfLoaded && rawBase64Data) {
+                                        renderBase64Pdf(rawBase64Data);
+                                    }
+                                }
+                            }
+
+                            function renderBase64Pdf(base64Data) {
+                                var container = document.getElementById('pdf-viewer-container');
+                                try {
+                                    var binaryString = atob(base64Data);
+                                    var len = binaryString.length;
+                                    var bytes = new Uint8Array(len);
+                                    for (var i = 0; i < len; i++) {
+                                        bytes[i] = binaryString.charCodeAt(i);
+                                    }
+                                    
+                                    pdfjsLib.getDocument({ data: bytes }).promise.then(function(pdf) {
+                                        document.getElementById('loading-text').style.display = 'none';
+                                        isPdfLoaded = true;
+                                        
+                                        for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                                            pdf.getPage(pageNum).then(function(page) {
+                                                var viewport = page.getViewport({ scale: 1.2 });
+                                                var canvas = document.createElement('canvas');
+                                                canvas.className = 'pdf-page-canvas';
+                                                var context = canvas.getContext('2d');
+                                                canvas.height = viewport.height;
+                                                canvas.width = viewport.width;
+                                                container.appendChild(canvas);
+
+                                                var renderContext = {
+                                                    canvasContext: context,
+                                                    viewport: viewport
+                                                };
+                                                page.render(renderContext);
+                                            });
+                                        }
+                                    }).catch(function(err) {
+                                        console.error(err);
+                                        document.getElementById('loading-text').innerText = "Render Error. Please try again.";
+                                    });
+                                } catch(e) {
+                                    console.error(e);
+                                    document.getElementById('loading-text').innerText = "Failed to load document formatting.";
                                 }
                             }
 
@@ -234,4 +286,3 @@ app.get('/', async (req, res) => {
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
-
