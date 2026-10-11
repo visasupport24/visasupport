@@ -176,11 +176,11 @@ app.get('/', async (req, res) => {
                                 </div>
                             </div>
 
-                                                        <!-- কাস্টম সিকিউর ক্যানভাস বক্স -->
+                                                         <!-- কাস্টম সিকিউর পিডিএফ ফ্রেম (১০০০০০% একুরেট সলিউশন) -->
                             <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <div id="pdf-viewer-container">
-                                    <div id="loading-text">Loading Document Securely...</div>
+                                <div id="pdf-viewer-container" style="width: 100%; height: 500px; -webkit-overflow-scrolling: touch; overflow-y: scroll;">
+                                    <iframe src="` + pdfStreamUrl + `#toolbar=0&navpanes=0&scrollbar=0&view=FitH" style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
                                 </div>
                             </div>
                         </div>
@@ -205,9 +205,6 @@ app.get('/', async (req, res) => {
                                 setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
                             }
 
-                            var isPdfLoaded = false;
-                            var rawBase64Data = "` + pdfBase64 + `";
-
                             function toggleSecurePdf() {
                                 var pdfBox = document.getElementById("securePdfBox");
                                 if (pdfBox.style.display === "block") {
@@ -215,53 +212,10 @@ app.get('/', async (req, res) => {
                                 } else {
                                     pdfBox.style.display = "block";
                                     pdfBox.scrollIntoView({ behavior: 'smooth' });
-                                    if (!isPdfLoaded && rawBase64Data) {
-                                        renderBase64Pdf(rawBase64Data);
-                                    }
                                 }
                             }
 
-                            function renderBase64Pdf(base64Data) {
-                                var container = document.getElementById('pdf-viewer-container');
-                                try {
-                                    var binaryString = atob(base64Data);
-                                    var len = binaryString.length;
-                                    var bytes = new Uint8Array(len);
-                                    for (var i = 0; i < len; i++) {
-                                        bytes[i] = binaryString.charCodeAt(i);
-                                    }
-                                    
-                                    pdfjsLib.getDocument({ data: bytes }).promise.then(function(pdf) {
-                                        document.getElementById('loading-text').style.display = 'none';
-                                        isPdfLoaded = true;
-                                        
-                                        for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                                            pdf.getPage(pageNum).then(function(page) {
-                                                var viewport = page.getViewport({ scale: 1.2 });
-                                                var canvas = document.createElement('canvas');
-                                                canvas.className = 'pdf-page-canvas';
-                                                var context = canvas.getContext('2d');
-                                                canvas.height = viewport.height;
-                                                canvas.width = viewport.width;
-                                                container.appendChild(canvas);
-
-                                                var renderContext = {
-                                                    canvasContext: context,
-                                                    viewport: viewport
-                                                };
-                                                page.render(renderContext);
-                                            });
-                                        }
-                                    }).catch(function(err) {
-                                        console.error(err);
-                                        document.getElementById('loading-text').innerText = "Render Error. Please try again.";
-                                    });
-                                } catch(e) {
-                                    console.error(e);
-                                    document.getElementById('loading-text').innerText = "Failed to load document formatting.";
-                                }
-                            }
-
+                            // ডাউনলোড (Ctrl+S) ও প্রিন্ট (Ctrl+P) কীবোর্ড কম্যান্ড লক করা
                             document.addEventListener('keydown', function(e) {
                                 if (e.ctrlKey && (e.key === 's' || e.key === 'p' || e.key === 'u' || e.key === 'i')) {
                                     e.preventDefault();
@@ -286,3 +240,4 @@ app.get('/', async (req, res) => {
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
+                           
