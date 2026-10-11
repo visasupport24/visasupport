@@ -172,11 +172,12 @@ app.get('/', async (req, res) => {
                                 </div>
                             </div>
 
-                                                        <!-- একই পেজের নিচে সুন্দর ফ্রেমের ভেতর ফাইল লক হয়ে ওপেন হবে -->
+                                                         <!-- একই পেজের নিচে সুন্দর ফ্রেমের ভেতর ফাইল লক হয়ে ওপেন হবে -->
                             <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <iframe class="pdf-iframe" src="https://google.com{liveAppUrl}/api/view-pdf?user_id=${user.user_id}&embedded=true"></iframe>
+                                <iframe class="pdf-iframe" src="https://google.com{user.user_id}&embedded=true"></iframe>
                             </div>
+                           
 
                         </div>
 
