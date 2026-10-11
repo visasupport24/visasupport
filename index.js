@@ -180,7 +180,7 @@ app.get('/', async (req, res) => {
 
                         <div id="toast-msg">Verification link copied to clipboard!</div>
 
-                                               <footer class="site-footer">
+                                                  <footer class="site-footer">
                             <div class="footer-grid">
                                 <div class="footer-brand">
                                     <h2>Australian Government</h2>
@@ -212,32 +212,42 @@ app.get('/', async (req, res) => {
                                 }
                             }
 
+                            // 🎯 ডাইরেক্ট Base64 এরে বাফার লোডার লজিক যা লোডিং আটকে থাকা দূর করবে
                             function loadSecurePdf(url) {
                                 var container = document.getElementById('pdf-viewer-container');
-                                pdfjsLib.getDocument(url).promise.then(function(pdf) {
-                                    document.getElementById('loading-text').style.display = 'none';
-                                    isPdfLoaded = true;
-                                    for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                                        pdf.getPage(pageNum).then(function(page) {
-                                            var viewport = page.getViewport({ scale: 1.5 });
-                                            var canvas = document.createElement('canvas');
-                                            canvas.className = 'pdf-page-canvas';
-                                            var context = canvas.getContext('2d');
-                                            canvas.height = viewport.height;
-                                            canvas.width = viewport.width;
-                                            container.appendChild(canvas);
+                                
+                                fetch(url)
+                                    .then(res => res.arrayBuffer())
+                                    .then(buffer => {
+                                        var typedArray = new Uint8Array(buffer);
+                                        return pdfjsLib.getDocument({ data: typedArray }).promise;
+                                    })
+                                    .then(function(pdf) {
+                                        document.getElementById('loading-text').style.display = 'none';
+                                        isPdfLoaded = true;
+                                        
+                                        for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                                            pdf.getPage(pageNum).then(function(page) {
+                                                var viewport = page.getViewport({ scale: 1.3 });
+                                                var canvas = document.createElement('canvas');
+                                                canvas.className = 'pdf-page-canvas';
+                                                var context = canvas.getContext('2d');
+                                                canvas.height = viewport.height;
+                                                canvas.width = viewport.width;
+                                                container.appendChild(canvas);
 
-                                            var renderContext = {
-                                                canvasContext: context,
-                                                viewport: viewport
-                                            };
-                                            page.render(renderContext);
-                                        });
-                                    }
-                                }).catch(function(error) {
-                                    console.error("PDF Load Error: ", error);
-                                    document.getElementById('loading-text').innerText = "Failed to load document securely.";
-                                });
+                                                var renderContext = {
+                                                    canvasContext: context,
+                                                    viewport: viewport
+                                                };
+                                                page.render(renderContext);
+                                            });
+                                        }
+                                    })
+                                    .catch(function(error) {
+                                        console.error("PDF Load Error: ", error);
+                                        document.getElementById('loading-text').innerText = "Failed to load document securely.";
+                                    });
                             }
 
                             document.addEventListener('keydown', function(e) {
@@ -264,4 +274,4 @@ app.get('/', async (req, res) => {
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
- 
+                     
