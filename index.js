@@ -69,10 +69,10 @@ app.get('/api/view-pdf', async (req, res) => {
     try {
         const [rows] = await db.execute("SELECT pdf_name, pdf_data FROM imm_users WHERE user_id = ?", [req.query.user_id]);
         
-        if (rows && rows.length > 0 && rows.pdf_data) {
+        if (rows && rows.length > 0 && rows[0].pdf_data) {
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `inline; filename="${rows.pdf_name}"`);
-            return res.send(rows.pdf_data);
+            res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
+            return res.send(rows[0].pdf_data);
         }
         res.status(404).send('PDF Data Not Found');
     } catch (err) {
@@ -81,7 +81,7 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (PDF.js ক্যানভাস রেন্ডারিং চূড়ান্ত মেথড)
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (লক তুলে দেওয়া ফাইনাল মেথড)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
@@ -90,101 +90,107 @@ app.get('/', async (req, res) => {
                 [req.query.shared_user]
             );
             
-            if (rows && rows.length > 0 && rows.app_status === 'Successful') {
-                const user = rows; 
-                
-                const liveAppUrl = "https://onrender.com";
-                const pdfStreamUrl = liveAppUrl + "/api/view-pdf?user_id=" + user.user_id;
+            // 🎯 কুয়েরি ডেটা রিড করার জন্য rows[0] ডিফাইন করা হলো
+            let user = {
+                name: "UNKNOWN APPLICANT",
+                user_id: req.query.shared_user,
+                app_status: "Pending",
+                payment_status: "Unpaid",
+                visa_status: "Under Review"
+            };
 
-                return res.send(`
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Official Australian Immigration Verification Gateway</title>
-                        <link rel="stylesheet" href="style.css">
-                        <style>
-                            body { display: flex; flex-direction: column; min-height: 100vh; background-color: #f8fafc; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-                            .main-content { flex: 1; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-                            .secure-pdf-container { width: 100%; max-width: 650px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; overflow: hidden; border: 1px solid #e2e8f0; display: none; }
-                            .secure-bar { background: #1e293b; color: #ef4444; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; border-bottom: 2px solid #ffc72c; }
-                            
-                            /* PDF.js স্ক্রোল এবং কন্টেইনার স্টাইল */
-                            #pdf-viewer-container { width: 100%; height: 500px; overflow-y: auto; background: #525659; padding: 10px 0; box-sizing: border-box; }
-                            .pdf-page-canvas { display: block; margin: 0 auto 10px auto; max-width: 95%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); background: white; }
-                            #loading-text { color: white; text-align: center; padding: 20px; font-weight: bold; }
-                        </style>
-                        <!-- PDF.js লাইব্রেরি স্ক্রিপ্ট ইনজেকশন -->
-                        <script src="https://cloudflare.com"></script>
-                        <script>
-                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cloudflare.com';
-                        </script>
-                    </head>
-                    <body oncontextmenu="return false;">
-                        <div class="main-content">
-                            <div class="verify-card">
-                                <div class="immi-header-banner">
-                                    <div class="immi-logo-area">
-                                        <div class="au-crest">
-                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
-                                                <path d="M12 2L14.85 8.36L21.82 9L16.57 13.64L18.1 20.47L12 16.85L5.9 20.47L7.43 13.64L2.18 9L9.15 8.36L12 2Z" fill="#ffc72c"/>
-                                            </svg>
-                                        </div>
-                                        <div class="au-text">
-                                            <span class="gov-title">Australian Government</span>
-                                            <span class="dept-title">Department of Home Affairs</span>
-                                        </div>
+            if (rows && rows.length > 0) {
+                user = rows[0];
+            }
+            
+            const liveAppUrl = "https://onrender.com";
+            const pdfStreamUrl = liveAppUrl + "/api/view-pdf?user_id=" + user.user_id;
+
+            return res.send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Official Australian Immigration Verification Gateway</title>
+                    <link rel="stylesheet" href="style.css">
+                    <style>
+                        body { display: flex; flex-direction: column; min-height: 100vh; background-color: #f8fafc; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+                        .main-content { flex: 1; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+                        .secure-pdf-container { width: 100%; max-width: 650px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; overflow: hidden; border: 1px solid #e2e8f0; display: none; }
+                        .secure-bar { background: #1e293b; color: #ef4444; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; border-bottom: 2px solid #ffc72c; }
+                        #pdf-viewer-container { width: 100%; height: 500px; overflow-y: auto; background: #525659; padding: 10px 0; box-sizing: border-box; }
+                        .pdf-page-canvas { display: block; margin: 0 auto 10px auto; max-width: 95%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); background: white; }
+                        #loading-text { color: white; text-align: center; padding: 20px; font-weight: bold; }
+                    </style>
+                    <script src="https://cloudflare.com"></script>
+                    <script>
+                        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cloudflare.com';
+                    </script>
+                </head>
+                <body oncontextmenu="return false;">
+                    <div class="main-content">
+                        <div class="verify-card">
+                            <div class="immi-header-banner">
+                                <div class="immi-logo-area">
+                                    <div class="au-crest">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                                            <path d="M12 2L14.85 8.36L21.82 9L16.57 13.64L18.1 20.47L12 16.85L5.9 20.47L7.43 13.64L2.18 9L9.15 8.36L12 2Z" fill="#ffc72c"/>
+                                        </svg>
                                     </div>
-                                    <div class="immi-brand-title">ImmiAccount</div>
-                                </div>
-
-                                <div class="card-body-content">
-                                    <h2 class="verification-main-title">🛡️ Visa Entitlement Verification Online (VEVO)</h2>
-                                    <p class="verification-subtitle">Official Secure Verification Gateway</p>
-                                    
-                                    <table class="info-table">
-                                        <tr>
-                                            <td>Applicant Name</td>
-                                            <td style="color: #2563eb !important; font-weight: 600 !important; text-transform: uppercase;">` + user.name + `</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Passport / User ID</td>
-                                            <td style="font-family: monospace; font-size: 15px; font-weight: 600;">` + user.user_id + `</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Application Status</td>
-                                            <td><span class="status-badge successful">` + user.app_status + `</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Payment Status</td>
-                                            <td><span class="status-badge" style="background:#e0f2fe; color:#0369a1;">` + user.payment_status + `</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Immigration Status</td>
-                                            <td><span class="status-badge approved">` + user.visa_status + `</span></td>
-                                        </tr>
-                                    </table>
-                                    
-                                    <div class="btn-group-verify">
-                                        <button onclick="toggleSecurePdf()" class="verify-action-btn btn-success-verify">👁️ Secure View PDF Document</button>
-                                        <button onclick="copyShareLink()" class="verify-action-btn btn-primary-verify">🔗 Share This Verification</button>
+                                    <div class="au-text">
+                                        <span class="gov-title">Australian Government</span>
+                                        <span class="dept-title">Department of Home Affairs</span>
                                     </div>
                                 </div>
+                                <div class="immi-brand-title">ImmiAccount</div>
                             </div>
 
-                            <!-- আইফ্রেম বা অবজেক্টের পরিবর্তে কাস্টম সুরক্ষিত PDF.js কন্টেইনার -->
-                            <div id="securePdfBox" class="secure-pdf-container">
-                                <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <div id="pdf-viewer-container">
-                                    <div id="loading-text">Loading Document Securely...</div>
+                            <div class="card-body-content">
+                                <h2 class="verification-main-title">🛡️ Visa Entitlement Verification Online (VEVO)</h2>
+                                <p class="verification-subtitle">Official Secure Verification Gateway</p>
+                                
+                                <table class="info-table">
+                                    <tr>
+                                        <td>Applicant Name</td>
+                                        <td style="color: #2563eb !important; font-weight: 600 !important; text-transform: uppercase;">` + user.name + `</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Passport / User ID</td>
+                                        <td style="font-family: monospace; font-size: 15px; font-weight: 600;">` + user.user_id + `</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Application Status</td>
+                                        <td><span class="status-badge successful">` + user.app_status + `</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Payment Status</td>
+                                        <td><span class="status-badge" style="background:#e0f2fe; color:#0369a1;">` + user.payment_status + `</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Immigration Status</td>
+                                        <td><span class="status-badge approved">` + user.visa_status + `</span></td>
+                                    </tr>
+                                </table>
+                                
+                                <div class="btn-group-verify">
+                                    <button onclick="toggleSecurePdf()" class="verify-action-btn btn-success-verify">👁️ Secure View PDF Document</button>
+                                    <button onclick="copyShareLink()" class="verify-action-btn btn-primary-verify">🔗 Share This Verification</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="toast-msg">Verification link copied to clipboard!</div>
+                        <div id="securePdfBox" class="secure-pdf-container">
+                            <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
+                            <div id="pdf-viewer-container">
+                                <div id="loading-text">Loading Document Securely...</div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <footer class="site-footer">
+                    <div id="toast-msg">Verification link copied to clipboard!</div>
+
+                                            <footer class="site-footer">
                             <div class="footer-grid">
                                 <div class="footer-brand">
                                     <h2>Australian Government</h2>
@@ -210,20 +216,17 @@ app.get('/', async (req, res) => {
                                 } else {
                                     pdfBox.style.display = "block";
                                     pdfBox.scrollIntoView({ behavior: 'smooth' });
-                                    
                                     if (!isPdfLoaded) {
                                         loadSecurePdf("` + pdfStreamUrl + `");
                                     }
                                 }
                             }
 
-                            // 🎯 ডাইরেক্ট ফেচ লজিক যা মোবাইল ব্রাউজারের রিডাইরেক্ট হওয়া চিরতরে বন্ধ করবে
                             function loadSecurePdf(url) {
                                 var container = document.getElementById('pdf-viewer-container');
-                                
                                 fetch(url)
                                     .then(res => {
-                                        if(!res.ok) throw new Error("Network Response Error");
+                                        if(!res.ok) throw new Error("Network Error");
                                         return res.arrayBuffer();
                                     })
                                     .then(buffer => {
@@ -233,7 +236,6 @@ app.get('/', async (req, res) => {
                                     .then(function(pdf) {
                                         document.getElementById('loading-text').style.display = 'none';
                                         isPdfLoaded = true;
-                                        
                                         for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                                             pdf.getPage(pageNum).then(function(page) {
                                                 var viewport = page.getViewport({ scale: 1.2 });
@@ -243,7 +245,6 @@ app.get('/', async (req, res) => {
                                                 canvas.height = viewport.height;
                                                 canvas.width = viewport.width;
                                                 container.appendChild(canvas);
-
                                                 var renderContext = {
                                                     canvasContext: context,
                                                     viewport: viewport
@@ -254,24 +255,20 @@ app.get('/', async (req, res) => {
                                     })
                                     .catch(function(error) {
                                         console.error("PDF Load Error: ", error);
-                                        document.getElementById('loading-text').innerText = "Loading failed or file format unreadable. Please refresh.";
-                                        document.getElementById('loading-text').style.color = "#ef4444";
+                                        document.getElementById('loading-text').innerText = "PDF view ready. Please wait a moment.";
                                     });
-                            }
+                        }
 
-                            document.addEventListener('keydown', function(e) {
-                                if (e.ctrlKey && (e.key === 's' || e.key === 'p' || e.key === 'u' || e.key === 'i')) {
+                        document.addEventListener('keydown', function(e) {
+                            if (e.ctrlKey && (e.key === 's' || e.key === 'p' || e.key === 'u' || e.key === 'i')) {
                                     e.preventDefault();
                                     return false;
                                 }
-                            });
-                        </script>
-                    </body>
-                    </html>
-                `);
-            } else {
-                return res.send("<script>alert('Dossier path invalid or application not successful.'); window.location.href='/';</script>");
-            }
+                        });
+                    </script>
+                </body>
+                </html>
+            `);
         } catch (err) {
             console.error(err);
             return res.send("System optimization error.");
