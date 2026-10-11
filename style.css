@@ -1,46 +1,365 @@
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; color: #1f2937; display: flex; flex-direction: column; min-height: 100vh; }
-.main-content { flex: 1; padding: 20px; }
-.container { max-width: 750px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 20px auto; }
-h1, h2, h3 { text-align: center; color: #0b2545; margin-bottom: 5px; }
+/* ----------------------------------------------------
+   Official ImmiAccount - Australian Layout Theme
+---------------------------------------------------- */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background-color: #f3f4f6; 
+    margin: 0; 
+    padding: 0; 
+    color: #1f2937; 
+    display: flex; 
+    flex-direction: column; 
+    min-height: 100vh; 
+}
+.main-content { 
+    flex: 1; 
+    padding: 20px; 
+}
+.container { 
+    max-width: 750px; 
+    background: white; 
+    padding: 30px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+    margin: 20px auto; 
+}
+h1, h2, h3 { 
+    text-align: center; 
+    color: #0c2340; 
+    margin-bottom: 5px; 
+}
 
-.nav-tabs { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; }
-.tab-btn { background-color: #f3f4f6; border: 1px solid #d1d5db; padding: 12px 20px; font-size: 15px; cursor: pointer; font-weight: bold; color: #4b5563; border-radius: 6px; flex: 1; min-width: 140px; text-align: center; transition: 0.2s; }
-.tab-btn.active { color: #ffffff; background-color: #1e3a8a; border-color: #1e3a8a; }
+.nav-tabs { 
+    display: flex; 
+    flex-direction: row; 
+    flex-wrap: wrap; 
+    justify-content: space-between; 
+    gap: 10px; 
+    margin-bottom: 25px; 
+    border-bottom: 2px solid #e5e7eb; 
+    padding-bottom: 12px; 
+}
+.tab-btn { 
+    background-color: #f3f4f6; 
+    border: 1px solid #d1d5db; 
+    padding: 12px 20px; 
+    font-size: 15px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    color: #4b5563; 
+    border-radius: 6px; 
+    flex: 1; 
+    min-width: 140px; 
+    text-align: center; 
+    transition: 0.2s; 
+}
+.tab-btn.active { 
+    color: #ffffff; 
+    background-color: #0c2340; 
+    border-color: #0c2340; 
+}
 
 .section { display: none; }
 .section.active { display: block; }
 label { font-weight: 600; display: block; margin-top: 15px; color: #374151; }
-input, select { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-button.submit-btn, .link-btn { background-color: #1e3a8a; color: white; border: none; padding: 12px; margin-top: 20px; cursor: pointer; border-radius: 6px; width: 100%; font-size: 16px; font-weight: bold; text-align:center; text-decoration:none; display:block; box-sizing: border-box; }
-button.submit-btn:hover, .link-btn:hover { background-color: #1d4ed8; }
+input, select { 
+    width: 100%; 
+    padding: 12px; 
+    margin-top: 6px; 
+    border: 1px solid #d1d5db; 
+    border-radius: 6px; 
+    box-sizing: border-box; 
+    font-size: 14px; 
+}
+input:focus, select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
 
-.status-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; margin-top: 20px; border-radius: 8px; }
-.status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; text-transform: uppercase; }
+button.submit-btn, .link-btn { 
+    background-color: #0c2340; 
+    color: white; 
+    border: none; 
+    padding: 12px; 
+    margin-top: 20px; 
+    cursor: pointer; 
+    border-radius: 6px; 
+    width: 100%; 
+    font-size: 16px; 
+    font-weight: bold; 
+    text-align:center; 
+    text-decoration:none; 
+    display:block; 
+    box-sizing: border-box; 
+    transition: 0.2s;
+}
+button.submit-btn:hover, .link-btn:hover { 
+    background-color: #1e3a8a; 
+}
+
+.status-box { 
+    background: #f8fafc; 
+    border: 1px solid #e2e8f0; 
+    padding: 20px; 
+    margin-top: 20px; 
+    border-radius: 8px; 
+}
+.status-badge { 
+    display: inline-block; 
+    padding: 6px 14px; 
+    border-radius: 20px; 
+    font-size: 13px; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+}
 
 .pending { background: #fef3c7; color: #d97706; }
 .successful, .approved { background: #dcfce7; color: #16a34a; }
 .rejected { background: #fee2e2; color: #dc2626; }
 
-.share-box { background: #ecfdf5; border: 1px dashed #10b981; padding: 15px; margin-top: 15px; border-radius: 6px; }
-.share-link { width: 100%; padding: 8px; background: white; border: 1px solid #a7f3d0; border-radius: 4px; font-family: monospace; font-size: 12px; margin-top: 5px; box-sizing: border-box; }
-.app-list-item { background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 15px; border-radius: 8px; }
-.admin-auth-box { max-width: 400px; margin: 30px auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; text-align: center; }
+.share-box { 
+    background: #ecfdf5; 
+    border: 1px dashed #10b981; 
+    padding: 15px; 
+    margin-top: 15px; 
+    border-radius: 6px; 
+}
+.app-list-item { 
+    background: #f9fafb; 
+    border: 1px solid #e5e7eb; 
+    padding: 20px; 
+    margin-bottom: 15px; 
+    border-radius: 8px; 
+}
+.admin-auth-box { 
+    max-width: 400px; 
+    margin: 30px auto; 
+    padding: 20px; 
+    border: 1px solid #e5e7eb; 
+    border-radius: 8px; 
+    background: #f9fafb; 
+    text-align: center; 
+}
 
-.site-footer { background-color: #0b2545; color: #ffffff; padding: 40px 20px 20px 20px; margin-top: 50px; font-size: 14px; }
-.footer-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; }
-.footer-brand h2 { color: #ffffff; text-align: left; margin: 0 0 5px 0; font-size: 22px; }
-.footer-brand p { color: #cbd5e1; line-height: 1.6; font-size: 13px; }
-.social-icons { display: flex; gap: 12px; margin-top: 15px; }
-.social-icons a { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255,255,255,0.08); color: #fff; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 15px; transition: 0.3s; }
-.social-icons a:hover { background: #2563eb; }
-.footer-column h3 { color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
-.footer-links { list-style: none; padding: 0; margin: 0; }
-.footer-links li { margin-bottom: 10px; }
-.footer-links a { color: #cbd5e1; text-decoration: none; transition: 0.2s; font-size: 13px; }
-.footer-links a:hover { color: #ffffff; padding-left: 4px; }
-.footer-bottom { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 13px; }
+/* ----------------------------------------------------
+   🇦🇺 Custom Card Styles for ImmiAccount UI Verification
+---------------------------------------------------- */
+.verify-card {
+    max-width: 650px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin: 20px auto;
+    border: 1px solid #e2e8f0;
+}
 
+.immi-header-banner {
+    background-color: #0c2340; /* Official Aussie Navy Blue */
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid #ffc72c; /* Gold Country Line */
+    text-align: left;
+}
+
+.immi-logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.au-crest {
+    display: flex;
+    align-items: center;
+}
+
+.au-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.gov-title {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.dept-title {
+    color: #cbd5e1;
+    font-size: 10.5px;
+    font-weight: 500;
+}
+
+.immi-brand-title {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.card-body-content {
+    padding: 30px 25px;
+    text-align: center;
+}
+
+.verification-main-title {
+    font-size: 20px;
+    color: #0c2340;
+    margin: 0 0 6px 0;
+    text-align: center;
+    font-weight: 700;
+}
+
+.verification-subtitle {
+    color: #64748b;
+    font-size: 13.5px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.info-table tr {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-table td {
+    padding: 14px 10px;
+    font-size: 14.5px;
+}
+
+.info-table tr:last-child {
+    border-bottom: none;
+}
+
+.info-table td:first-child {
+    font-weight: 600;
+    color: #64748b;
+    width: 45%;
+}
+
+.info-table td:last-child {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+/* Custom verification page buttons */
+.btn-group-verify {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.verify-action-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.btn-success-verify {
+    background-color: #10b981;
+    color: white;
+}
+.btn-success-verify:hover {
+    background-color: #059669;
+}
+
+.btn-primary-verify {
+    background-color: #2563eb;
+    color: white;
+}
+.btn-primary-verify:hover {
+    background-color: #1d4ed8;
+}
+
+/* Custom Notification Toast */
+#toast-msg {
+    visibility: hidden;
+    min-width: 280px;
+    background-color: #1e293b;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 14px;
+    position: fixed;
+    z-index: 999;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+#toast-msg.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+@keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+/* Footer Design */
+.site-footer { 
+    background-color: #0c2340; 
+    color: #ffffff; 
+    padding: 35px 20px 20px 20px; 
+    margin-top: 40px; 
+    font-size: 13.5px;
+    border-top: 4px solid #ffc72c;
+}
+.footer-grid { 
+    max-width: 1100px; 
+    margin: 0 auto; 
+}
+.footer-brand h2 { 
+    color: #ffffff; 
+    text-align: left; 
+    margin: 0 0 6px 0; 
+    font-size: 18px; 
+}
+.footer-brand p { 
+    color: #cbd5e1; 
+    line-height: 1.5; 
+    font-size: 12.5px; 
+    margin: 0;
+}
+.footer-bottom { 
+    text-align: center; 
+    margin-top: 25px; 
+    padding-top: 15px; 
+    border-top: 1px solid rgba(255,255,255,0.08); 
+    color: #94a3b8; 
+    font-size: 12px; 
+}
+
+/* ----------------------------------------------------
+   Responsive Adjustments
+---------------------------------------------------- */
 @media (max-width: 600px) {
-    .nav-tabs { flex-direction: column; }
+    .nav-tabs { flex-direction: column; gap: 6px; }
     .tab-btn { width: 100%; }
+    .immi-header-banner { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .immi-brand-title { align-self: flex-end; font-size: 14px; }
+    .info-table td { font-size: 13px; padding: 12px 6px; }
 }
