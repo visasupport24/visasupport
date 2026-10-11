@@ -69,10 +69,10 @@ app.get('/api/view-pdf', async (req, res) => {
     try {
         const [rows] = await db.execute("SELECT pdf_name, pdf_data FROM imm_users WHERE user_id = ?", [req.query.user_id]);
         
-        if (rows && rows.length > 0 && rows[0].pdf_data) {
+        if (rows && rows.length > 0 && rows.pdf_data) {
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
-            return res.send(rows[0].pdf_data);
+            res.setHeader('Content-Disposition', `inline; filename="${rows.pdf_name}"`);
+            return res.send(rows.pdf_data);
         }
         res.status(404).send('PDF Data Not Found');
     } catch (err) {
@@ -81,7 +81,7 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (PDF.js মোবাইল ফ্রেন্ডলি ভিউ সহ)
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (সিনট্যাক্স ফিক্সড এবং সিকিউর মোড ভিউ সহ)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
@@ -90,8 +90,8 @@ app.get('/', async (req, res) => {
                 [req.query.shared_user]
             );
             
-            if (rows.length > 0 && rows[0].app_status === 'Successful') {
-                const user = rows[0]; 
+            if (rows.length > 0 && rows.app_status === 'Successful') {
+                const user = rows; 
                 
                 const liveAppUrl = "https://onrender.com";
                 const pdfStreamUrl = liveAppUrl + "/api/view-pdf?user_id=" + user.user_id;
@@ -109,14 +109,7 @@ app.get('/', async (req, res) => {
                             .main-content { flex: 1; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
                             .secure-pdf-container { width: 100%; max-width: 650px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; overflow: hidden; border: 1px solid #e2e8f0; display: none; }
                             .secure-bar { background: #1e293b; color: #ef4444; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; border-bottom: 2px solid #ffc72c; }
-                            #pdf-viewer-container { width: 100%; height: 500px; overflow-y: auto; background: #525659; padding: 10px 0; box-sizing: border-box; }
-                            .pdf-page-canvas { display: block; margin: 0 auto 10px auto; max-width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); background: white; }
-                            #loading-text { color: white; text-align: center; padding: 20px; font-weight: bold; }
                         </style>
-                        <script src="https://cloudflare.com"></script>
-                        <script>
-                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cloudflare.com';
-                        </script>
                     </head>
                     <body oncontextmenu="return false;">
                         <div class="main-content">
@@ -172,15 +165,13 @@ app.get('/', async (req, res) => {
 
                             <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <div id="pdf-viewer-container">
-                                    <div id="loading-text">Loading Document Securely...</div>
-                                </div>
+                                <div id="pdf-viewer-container"></div>
                             </div>
                         </div>
 
                         <div id="toast-msg">Verification link copied to clipboard!</div>
 
-                                                    <footer class="site-footer">
+                        <footer class="site-footer">
                             <div class="footer-grid">
                                 <div class="footer-brand">
                                     <h2>Australian Government</h2>
@@ -190,7 +181,7 @@ app.get('/', async (req, res) => {
                             <div class="footer-bottom">&copy; 2026 Department of Home Affairs. All rights reserved.</div>
                         </footer>
 
-                        <script>
+                                                <script>
                             function copyShareLink() {
                                 navigator.clipboard.writeText(window.location.href);
                                 var toast = document.getElementById("toast-msg");
@@ -201,6 +192,7 @@ app.get('/', async (req, res) => {
                             function toggleSecurePdf() {
                                 var pdfBox = document.getElementById("securePdfBox");
                                 var container = document.getElementById('pdf-viewer-container');
+                                var pdfUrl = "` + pdfStreamUrl + `#toolbar=0&navpanes=0";
                                 
                                 if (pdfBox.style.display === "block") {
                                     pdfBox.style.display = "none";
@@ -208,12 +200,7 @@ app.get('/', async (req, res) => {
                                     pdfBox.style.display = "block";
                                     pdfBox.scrollIntoView({ behavior: 'smooth' });
                                     
-                                    // 🎯 ডাইরেক্ট এমবেড অবজেক্ট মেথড যা মোবাইলেও সরাসরি এরর ছাড়া ফাস্ট লোড হবে
-                                    container.innerHTML = `
-                                        <object data="` + pdfStreamUrl + `#toolbar=0&navpanes=0&statusbar=0&messages=0" type="application/pdf" style="width:100%; height:500px;">
-                                            <embed src="` + pdfStreamUrl + `#toolbar=0&navpanes=0&statusbar=0&messages=0" type="application/pdf" style="width:100%; height:500px;" />
-                                        </object>
-                                    `;
+                                    container.innerHTML = '<iframe src="' + pdfUrl + '" style="width:100%; height:500px; border:none;"></iframe>';
                                 }
                             }
 
@@ -241,4 +228,3 @@ app.get('/', async (req, res) => {
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
-                      
