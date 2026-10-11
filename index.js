@@ -63,33 +63,33 @@ app.post('/api/upload-pdf', upload.single('visa_document'), async (req, res) => 
     }
 });
 
-// ২. পিডিএফ বাইনারি স্ট্রিমিং এপিআই রাউট (সঠিক ডাটা প্রপার্টি ফিক্সড)
+// ২. পিডিএফ বাইনারি স্ট্রিমিং এপিআই রাউট
 app.get('/api/view-pdf', async (req, res) => {
     if (!req.query.user_id) return res.status(400).send('Missing User ID');
     try {
-        // ডাটাবেজ থেকে পিডিএফ ফাইল ও নাম তুলে আনা
         const [rows] = await db.execute("SELECT pdf_name, pdf_data FROM imm_users WHERE user_id = ?", [req.query.user_id]);
         
-        // 🎯 ফিক্স: rows[0] ব্যবহার করে ডাটা চেক করা এবং pdf_data আছে কি না নিশ্চিত করা
         if (rows && rows.length > 0 && rows[0].pdf_data) {
             res.setHeader('Content-Type', 'application/pdf');
+            // 'inline' দেওয়ার কারণে ব্রাউজার এটিকে সরাসরি ডাউনলোড না করে ডিসপ্লে করবে
             res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
             return res.send(rows[0].pdf_data);
         }
-        
         res.status(404).send('PDF Data Not Found');
     } catch (err) {
-        console.error("PDF View Error: ", err); // Render লগে এররটি দেখার জন্য
+        console.error(err);
         res.status(500).send('Internal Server Error');
     }
 });
 
-
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (Australian ImmiAccount / VEVO Theme)
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (শুধুমাত্র সিকিউর মোড ভিউ সহ)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
-            const [rows] = await db.execute("SELECT name, user_id, pdf_name, app_status, payment_status, visa_status FROM imm_users WHERE user_id = ?", [req.query.shared_user]);
+            const [rows] = await db.execute(
+                "SELECT name, user_id, pdf_name, app_status, payment_status, visa_status FROM imm_users WHERE user_id = ?", 
+                [req.query.shared_user]
+            );
             
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; 
@@ -109,14 +109,19 @@ app.get('/', async (req, res) => {
                         <title>Official Australian Immigration Verification Gateway</title>
                         <link rel="stylesheet" href="style.css">
                         <style>
-                            body { display: flex; flex-direction: column; min-height: 100vh; background-color: #f8fafc; }
-                            .main-content { flex: 1; padding: 20px 10px; display: flex; justify-content: center; align-items: center; }
+                            body { display: flex; flex-direction: column; min-height: 100vh; background-color: #f8fafc; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+                            .main-content { flex: 1; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+                            
+                            /* সিকিউর পিডিএফ কনটেইনার */
+                            .secure-pdf-container { width: 100%; max-width: 650px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; overflow: hidden; border: 1px solid #e2e8f0; display: none; }
+                            .secure-bar { background: #1e293b; color: #ef4444; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; border-bottom: 2px solid #ffc72c; }
+                            .pdf-iframe { width: 100%; height: 500px; border: none; }
                         </style>
                     </head>
-                    <body>
+                    <!-- রাইট ক্লিক এবং সাধারণ কী-বোর্ড ইভেন্ট ডিফল্ট লেভেলে ব্লক করা হয়েছে -->
+                    <body oncontextmenu="return false;">
                         <div class="main-content">
                             <div class="verify-card">
-                                <!-- 🇦🇺 Australian ImmiAccount Official Top Banner -->
                                 <div class="immi-header-banner">
                                     <div class="immi-logo-area">
                                         <div class="au-crest">
@@ -160,16 +165,23 @@ app.get('/', async (req, res) => {
                                     </table>
                                     
                                     <div class="btn-group-verify">
-                                        <a href="${pdfStreamUrl}" target="_blank" class="verify-action-btn btn-success-verify">👁️ View Verified PDF Document</a>
+                                        <!-- নতুন ইন-পেজ সিকিউর ভিউ বাটন -->
+                                        <button onclick="toggleSecurePdf()" class="verify-action-btn btn-success-verify">👁️ Secure View PDF Document</button>
                                         <button onclick="copyShareLink()" class="verify-action-btn btn-primary-verify">🔗 Share This Verification</button>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- একই পেজের নিচে সুন্দর ফ্রেমের ভেতর ফাইল লক হয়ে ওপেন হবে -->
+                            <div id="securePdfBox" class="secure-pdf-container">
+                                <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
+                                <iframe class="pdf-iframe" src="${pdfStreamUrl}#toolbar=0&navpanes=0&scrollbar=0"></iframe>
                             </div>
                         </div>
 
                         <div id="toast-msg">Verification link copied to clipboard!</div>
 
-                        <footer class="site-footer">
+                                                <footer class="site-footer">
                             <div class="footer-grid">
                                 <div class="footer-brand">
                                     <h2>Australian Government</h2>
@@ -186,6 +198,24 @@ app.get('/', async (req, res) => {
                                 toast.className = "show";
                                 setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
                             }
+
+                            function toggleSecurePdf() {
+                                var pdfBox = document.getElementById("securePdfBox");
+                                if (pdfBox.style.display === "block") {
+                                    pdfBox.style.display = "none";
+                                } else {
+                                    pdfBox.style.display = "block";
+                                    pdfBox.scrollIntoView({ behavior: 'smooth' });
+                                }
+                            }
+
+                            // ডাউনলোড (Ctrl+S) ও প্রিন্ট (Ctrl+P) কীবোর্ড কম্যান্ড লক করা
+                            document.addEventListener('keydown', function(e) {
+                                if (e.ctrlKey && (e.key === 's' || e.key === 'p' || e.key === 'u' || e.key === 'i')) {
+                                    e.preventDefault();
+                                    return false;
+                                }
+                            });
                         </script>
                     </body>
                     </html>
