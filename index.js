@@ -90,8 +90,9 @@ app.get('/', async (req, res) => {
                 [req.query.shared_user]
             );
             
-            if (rows && rows.length > 0 && rows.app_status === 'Successful') {
-                const user = rows; 
+            if (rows && rows.length > 0 && rows[0].app_status === 'Successful') {
+    const user = rows[0]; 
+
                 
                 const liveAppUrl = "https://onrender.com";
                 const pdfStreamUrl = liveAppUrl + "/api/view-pdf?user_id=" + user.user_id;
