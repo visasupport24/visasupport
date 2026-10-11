@@ -71,7 +71,6 @@ app.get('/api/view-pdf', async (req, res) => {
         
         if (rows && rows.length > 0 && rows[0].pdf_data) {
             res.setHeader('Content-Type', 'application/pdf');
-            // 'inline' দেওয়ার কারণে ব্রাউজার এটিকে সরাসরি ডাউনলোড না করে ডিসপ্লে করবে
             res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
             return res.send(rows[0].pdf_data);
         }
@@ -82,7 +81,7 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (শুধুমাত্র সিকিউর মোড ভিউ সহ)
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (PDF.js মোবাইল ফ্রেন্ডলি ভিউ সহ)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
@@ -96,7 +95,6 @@ app.get('/', async (req, res) => {
                 
                 const liveAppUrl = "https://onrender.com";
                 const pdfStreamUrl = liveAppUrl + "/api/view-pdf?user_id=" + user.user_id;
-                const googleViewerUrl = "https://google.com" + encodeURIComponent(pdfStreamUrl) + "&embedded=true";
 
                 return res.send(`
                     <!DOCTYPE html>
@@ -111,8 +109,14 @@ app.get('/', async (req, res) => {
                             .main-content { flex: 1; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
                             .secure-pdf-container { width: 100%; max-width: 650px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; overflow: hidden; border: 1px solid #e2e8f0; display: none; }
                             .secure-bar { background: #1e293b; color: #ef4444; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; border-bottom: 2px solid #ffc72c; }
-                            .pdf-iframe { width: 100%; height: 500px; border: none; }
+                            #pdf-viewer-container { width: 100%; height: 500px; overflow-y: auto; background: #525659; padding: 10px 0; box-sizing: border-box; }
+                            .pdf-page-canvas { display: block; margin: 0 auto 10px auto; max-width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); background: white; }
+                            #loading-text { color: white; text-align: center; padding: 20px; font-weight: bold; }
                         </style>
+                        <script src="https://cloudflare.com"></script>
+                        <script>
+                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cloudflare.com';
+                        </script>
                     </head>
                     <body oncontextmenu="return false;">
                         <div class="main-content">
@@ -168,14 +172,15 @@ app.get('/', async (req, res) => {
 
                             <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <iframe class="pdf-iframe" src="/api/view-pdf?user_id=` + user.user_id + `#toolbar=0&navpanes=0"></iframe>
-
+                                <div id="pdf-viewer-container">
+                                    <div id="loading-text">Loading Document Securely...</div>
+                                </div>
                             </div>
                         </div>
 
                         <div id="toast-msg">Verification link copied to clipboard!</div>
 
-                        <footer class="site-footer">
+                                               <footer class="site-footer">
                             <div class="footer-grid">
                                 <div class="footer-brand">
                                     <h2>Australian Government</h2>
@@ -193,6 +198,7 @@ app.get('/', async (req, res) => {
                                 setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
                             }
 
+                            var isPdfLoaded = false;
                             function toggleSecurePdf() {
                                 var pdfBox = document.getElementById("securePdfBox");
                                 if (pdfBox.style.display === "block") {
@@ -200,7 +206,38 @@ app.get('/', async (req, res) => {
                                 } else {
                                     pdfBox.style.display = "block";
                                     pdfBox.scrollIntoView({ behavior: 'smooth' });
+                                    if (!isPdfLoaded) {
+                                        loadSecurePdf("` + pdfStreamUrl + `");
+                                    }
                                 }
+                            }
+
+                            function loadSecurePdf(url) {
+                                var container = document.getElementById('pdf-viewer-container');
+                                pdfjsLib.getDocument(url).promise.then(function(pdf) {
+                                    document.getElementById('loading-text').style.display = 'none';
+                                    isPdfLoaded = true;
+                                    for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                                        pdf.getPage(pageNum).then(function(page) {
+                                            var viewport = page.getViewport({ scale: 1.5 });
+                                            var canvas = document.createElement('canvas');
+                                            canvas.className = 'pdf-page-canvas';
+                                            var context = canvas.getContext('2d');
+                                            canvas.height = viewport.height;
+                                            canvas.width = viewport.width;
+                                            container.appendChild(canvas);
+
+                                            var renderContext = {
+                                                canvasContext: context,
+                                                viewport: viewport
+                                            };
+                                            page.render(renderContext);
+                                        });
+                                    }
+                                }).catch(function(error) {
+                                    console.error("PDF Load Error: ", error);
+                                    document.getElementById('loading-text').innerText = "Failed to load document securely.";
+                                });
                             }
 
                             document.addEventListener('keydown', function(e) {
@@ -224,9 +261,7 @@ app.get('/', async (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-
-                                                                                    
-
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
+ 
