@@ -94,11 +94,9 @@ app.get('/', async (req, res) => {
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; 
                 
-                const liveAppUrl = process.env.NODE_ENV === 'production' 
-                    ? `https://${process.env.RENDER_EXTERNAL_URL.replace(/^https?:\/\//, '')}` 
-                    : `http://localhost:${port}`;
-
-                const pdfStreamUrl = `${liveAppUrl}/api/view-pdf?user_id=${user.user_id}`;
+                const liveAppUrl = "https://onrender.com";
+                const pdfStreamUrl = liveAppUrl + "/api/view-pdf?user_id=" + user.user_id;
+                const googleViewerUrl = "https://google.com" + encodeURIComponent(pdfStreamUrl) + "&embedded=true";
 
                 return res.send(`
                     <!DOCTYPE html>
@@ -111,14 +109,11 @@ app.get('/', async (req, res) => {
                         <style>
                             body { display: flex; flex-direction: column; min-height: 100vh; background-color: #f8fafc; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
                             .main-content { flex: 1; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-                            
-                            /* সিকিউর পিডিএফ কনটেইনার */
                             .secure-pdf-container { width: 100%; max-width: 650px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; overflow: hidden; border: 1px solid #e2e8f0; display: none; }
                             .secure-bar { background: #1e293b; color: #ef4444; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; border-bottom: 2px solid #ffc72c; }
                             .pdf-iframe { width: 100%; height: 500px; border: none; }
                         </style>
                     </head>
-                    <!-- রাইট ক্লিক এবং সাধারণ কী-বোর্ড ইভেন্ট ডিফল্ট লেভেলে ব্লক করা হয়েছে -->
                     <body oncontextmenu="return false;">
                         <div class="main-content">
                             <div class="verify-card">
@@ -144,46 +139,42 @@ app.get('/', async (req, res) => {
                                     <table class="info-table">
                                         <tr>
                                             <td>Applicant Name</td>
-                                            <td style="color: #2563eb !important; font-weight: 600 !important; text-transform: uppercase;">${user.name}</td>
+                                            <td style="color: #2563eb !important; font-weight: 600 !important; text-transform: uppercase;">` + user.name + `</td>
                                         </tr>
                                         <tr>
                                             <td>Passport / User ID</td>
-                                            <td style="font-family: monospace; font-size: 15px; font-weight: 600;">${user.user_id}</td>
+                                            <td style="font-family: monospace; font-size: 15px; font-weight: 600;">` + user.user_id + `</td>
                                         </tr>
                                         <tr>
                                             <td>Application Status</td>
-                                            <td><span class="status-badge successful">${user.app_status}</span></td>
+                                            <td><span class="status-badge successful">` + user.app_status + `</span></td>
                                         </tr>
                                         <tr>
                                             <td>Payment Status</td>
-                                            <td><span class="status-badge" style="background:#e0f2fe; color:#0369a1;">${user.payment_status}</span></td>
+                                            <td><span class="status-badge" style="background:#e0f2fe; color:#0369a1;">` + user.payment_status + `</span></td>
                                         </tr>
                                         <tr>
                                             <td>Immigration Status</td>
-                                            <td><span class="status-badge approved">${user.visa_status}</span></td>
+                                            <td><span class="status-badge approved">` + user.visa_status + `</span></td>
                                         </tr>
                                     </table>
                                     
                                     <div class="btn-group-verify">
-                                        <!-- নতুন ইন-পেজ সিকিউর ভিউ বাটন -->
                                         <button onclick="toggleSecurePdf()" class="verify-action-btn btn-success-verify">👁️ Secure View PDF Document</button>
                                         <button onclick="copyShareLink()" class="verify-action-btn btn-primary-verify">🔗 Share This Verification</button>
                                     </div>
                                 </div>
                             </div>
 
-                                                         <!-- একই পেজের নিচে সুন্দর ফ্রেমের ভেতর ফাইল লক হয়ে ওপেন হবে -->
                             <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <iframe class="pdf-iframe" src="https://google.com{user.user_id}&embedded=true"></iframe>
+                                <iframe class="pdf-iframe" src="` + googleViewerUrl + `"></iframe>
                             </div>
-                           
-
                         </div>
 
                         <div id="toast-msg">Verification link copied to clipboard!</div>
 
-                                                <footer class="site-footer">
+                        <footer class="site-footer">
                             <div class="footer-grid">
                                 <div class="footer-brand">
                                     <h2>Australian Government</h2>
@@ -211,7 +202,6 @@ app.get('/', async (req, res) => {
                                 }
                             }
 
-                            // ডাউনলোড (Ctrl+S) ও প্রিন্ট (Ctrl+P) কীবোর্ড কম্যান্ড লক করা
                             document.addEventListener('keydown', function(e) {
                                 if (e.ctrlKey && (e.key === 's' || e.key === 'p' || e.key === 'u' || e.key === 'i')) {
                                     e.preventDefault();
@@ -232,6 +222,9 @@ app.get('/', async (req, res) => {
     }
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+
+                                                                                    
 
 app.use(express.static(__dirname));
 
