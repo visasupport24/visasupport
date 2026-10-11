@@ -168,7 +168,8 @@ app.get('/', async (req, res) => {
 
                             <div id="securePdfBox" class="secure-pdf-container">
                                 <div class="secure-bar">🔒 SECURE GATEWAY MODE — DOWNLOAD & PRINT DISABLED</div>
-                                <iframe class="pdf-iframe" src="` + googleViewerUrl + `"></iframe>
+                                <iframe class="pdf-iframe" src="/api/view-pdf?user_id=` + user.user_id + `#toolbar=0&navpanes=0"></iframe>
+
                             </div>
                         </div>
 
