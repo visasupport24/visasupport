@@ -69,10 +69,10 @@ app.get('/api/view-pdf', async (req, res) => {
     try {
         const [rows] = await db.execute("SELECT pdf_name, pdf_data FROM imm_users WHERE user_id = ?", [req.query.user_id]);
         
-        if (rows && rows.length > 0 && rows[0].pdf_data) {
+        if (rows && rows.length > 0 && rows.pdf_data) {
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `inline; filename="${rows[0].pdf_name}"`);
-            return res.send(rows[0].pdf_data);
+            res.setHeader('Content-Disposition', `inline; filename="${rows.pdf_name}"`);
+            return res.send(rows.pdf_data);
         }
         res.status(404).send('PDF Data Not Found');
     } catch (err) {
@@ -81,7 +81,7 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (ডাটাবেজ অবজেক্ট এবং ইন-পেজ ভিউ ফিক্সড)
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (সম্পূর্ণ অবজেক্ট ও এমবেড ফিক্স সহ)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
@@ -90,9 +90,8 @@ app.get('/', async (req, res) => {
                 [req.query.shared_user]
             );
             
-            // 🎯 ফিক্স: rows[0] ব্যবহার করে অবজেক্ট ডাটা সঠিকভাবে চেক করা হলো
-            if (rows && rows.length > 0 && rows[0].app_status === 'Successful') {
-                const user = rows[0]; 
+            if (rows && rows.length > 0 && rows.app_status === 'Successful') {
+                const user = rows; 
                 
                 const liveAppUrl = "https://onrender.com";
                 const pdfStreamUrl = liveAppUrl + "/api/view-pdf?user_id=" + user.user_id;
@@ -182,7 +181,7 @@ app.get('/', async (req, res) => {
                             <div class="footer-bottom">&copy; 2026 Department of Home Affairs. All rights reserved.</div>
                         </footer>
 
-                                                <script>
+                        <script>
                             function copyShareLink() {
                                 navigator.clipboard.writeText(window.location.href);
                                 var toast = document.getElementById("toast-msg");
@@ -190,7 +189,7 @@ app.get('/', async (req, res) => {
                                 setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
                             }
 
-                            function toggleSecurePdf() {
+                                                        function toggleSecurePdf() {
                                 var pdfBox = document.getElementById("securePdfBox");
                                 var container = document.getElementById('pdf-viewer-container');
                                 var pdfUrl = "` + pdfStreamUrl + `#toolbar=0&navpanes=0&statusbar=0&messages=0";
@@ -201,12 +200,7 @@ app.get('/', async (req, res) => {
                                     pdfBox.style.display = "block";
                                     pdfBox.scrollIntoView({ behavior: 'smooth' });
                                     
-                                    // 🎯 ফিক্স: Render-এর iframe রিফিউজ এরর দূর করতে মডার্ন এমবেড অবজেক্ট মেথড
-                                    container.innerHTML = `
-                                        <object data="` + pdfUrl + `" type="application/pdf" style="width:100%; height:500px;">
-                                            <embed src="` + pdfUrl + `" type="application/pdf" style="width:100%; height:500px;" />
-                                        </object>
-                                    `;
+                                    container.innerHTML = '<object data="' + pdfUrl + '" type="application/pdf" style="width:100%; height:500px;"><embed src="' + pdfUrl + '" type="application/pdf" style="width:100%; height:500px;" /></object>';
                                 }
                             }
 
@@ -234,3 +228,4 @@ app.get('/', async (req, res) => {
 app.use(express.static(__dirname));
 
 app.listen(port, () => console.log(`🚀 Gateway Running On Port ${port}`));
+
