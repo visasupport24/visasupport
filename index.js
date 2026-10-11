@@ -81,7 +81,7 @@ app.get('/api/view-pdf', async (req, res) => {
     }
 });
 
-// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে
+// ৩. শেয়ার্ড ভেরিফিকেশন গেটওয়ে (Australian ImmiAccount / VEVO Theme)
 app.get('/', async (req, res) => {
     if (req.query.shared_user) {
         try {
@@ -90,7 +90,6 @@ app.get('/', async (req, res) => {
             if (rows.length > 0 && rows[0].app_status === 'Successful') {
                 const user = rows[0]; 
                 
-                // 🎯 ডবল স্ল্যাশ এরর এড়াতে ইউআরএল এর শেষের স্ল্যাশ বাদ দিয়ে প্রফেশনাল এনভায়রনমেন্ট লজিক
                 const liveAppUrl = process.env.NODE_ENV === 'production' 
                     ? `https://${process.env.RENDER_EXTERNAL_URL.replace(/^https?:\/\//, '')}` 
                     : `http://localhost:${port}`;
@@ -103,40 +102,85 @@ app.get('/', async (req, res) => {
                     <head>
                         <meta charset="UTF-8">
                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Official Immigration Verification Gateway</title>
+                        <title>Official Australian Immigration Verification Gateway</title>
+                        <link rel="stylesheet" href="style.css">
                         <style>
-                            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 10px; margin: 0; color: #1f2937; }
-                            .verify-card { max-width: 800px; margin: 30px auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #10b981; text-align: center; }
-                            .submit-btn { background: #2563eb; color: white; border: none; padding: 12px 25px; margin: 20px auto; cursor: pointer; border-radius: 50px; font-size: 15px; font-weight: bold; width: 100%; max-width: 300px; display: block; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; }
-                            .badge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 25px 0; text-align: left; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; }
-                            .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-                            .successful, .approved { background: #dcfce7; color: #16a34a; }
+                            body { display: flex; flex-direction: column; min-height: 100vh; background-color: #f8fafc; }
+                            .main-content { flex: 1; padding: 20px 10px; display: flex; justify-content: center; align-items: center; }
                         </style>
                     </head>
                     <body>
-                        <div class="verify-card">
-                            <h2>🛡️ Official Dossier Verification</h2>
-                            <p style="color: #6b7280; font-size: 14px;">High Commission Immigration Clearance System</p>
-                            
-                            <button onclick="copyShareLink()" class="submit-btn">🔗 Share This Verification</button>
-                            
-                            <div class="badge-grid">
-                                <div><b>Applicant Name:</b> <span style="color:#1e3a8a;">${user.name}</span></div>
-                                <div><b>Passport/User ID:</b> <span>${user.user_id}</span></div>
-                                <div><b>Application Status:</b> <span class="status-badge successful">${user.app_status}</span></div>
-                                <div><b>Payment Status:</b> <span class="status-badge" style="background:#e0f2fe; color:#0369a1;">${user.payment_status}</span></div>
-                                <div><b>Immigration Status:</b> <span class="status-badge approved">${user.visa_status}</span></div>
+                        <div class="main-content">
+                            <div class="verify-card">
+                                <!-- 🇦🇺 Australian ImmiAccount Official Top Banner -->
+                                <div class="immi-header-banner">
+                                    <div class="immi-logo-area">
+                                        <div class="au-crest">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                                                <path d="M12 2L14.85 8.36L21.82 9L16.57 13.64L18.1 20.47L12 16.85L5.9 20.47L7.43 13.64L2.18 9L9.15 8.36L12 2Z" fill="#ffc72c"/>
+                                            </svg>
+                                        </div>
+                                        <div class="au-text">
+                                            <span class="gov-title">Australian Government</span>
+                                            <span class="dept-title">Department of Home Affairs</span>
+                                        </div>
+                                    </div>
+                                    <div class="immi-brand-title">ImmiAccount</div>
+                                </div>
+
+                                <div class="card-body-content">
+                                    <h2 class="verification-main-title">🛡️ Visa Entitlement Verification Online (VEVO)</h2>
+                                    <p class="verification-subtitle">Official Secure Verification Gateway</p>
+                                    
+                                    <table class="info-table">
+                                        <tr>
+                                            <td>Applicant Name</td>
+                                            <td style="color: #2563eb !important; font-weight: 600 !important; text-transform: uppercase;">${user.name}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Passport / User ID</td>
+                                            <td style="font-family: monospace; font-size: 15px; font-weight: 600;">${user.user_id}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Application Status</td>
+                                            <td><span class="status-badge successful">${user.app_status}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Payment Status</td>
+                                            <td><span class="status-badge" style="background:#e0f2fe; color:#0369a1;">${user.payment_status}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Immigration Status</td>
+                                            <td><span class="status-badge approved">${user.visa_status}</span></td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <div class="btn-group-verify">
+                                        <a href="${pdfStreamUrl}" target="_blank" class="verify-action-btn btn-success-verify">👁️ View Verified PDF Document</a>
+                                        <button onclick="copyShareLink()" class="verify-action-btn btn-primary-verify">🔗 Share This Verification</button>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <h3>📄 Verified Document Stream:</h3>
-                            
-                            <!-- প্রফেশনাল ভিউ বাটন যা সরাসরি ফুল স্ক্রিনে পিডিএফ ওপেন করবে (সাদা বক্স সম্পূর্ণ বাদ) -->
-                            <a href="${pdfStreamUrl}" target="_blank" class="submit-btn" style="background:#10b981; margin-bottom: 20px; text-decoration: none;">👁️ View Verified PDF Document</a>
                         </div>
+
+                        <div id="toast-msg">Verification link copied to clipboard!</div>
+
+                        <footer class="site-footer">
+                            <div class="footer-grid">
+                                <div class="footer-brand">
+                                    <h2>Australian Government</h2>
+                                    <p>Official Department of Home Affairs tracking portal for visa, immigration, and citizenship status check.</p>
+                                </div>
+                            </div>
+                            <div class="footer-bottom">&copy; 2026 Department of Home Affairs. All rights reserved.</div>
+                        </footer>
+
                         <script>
                             function copyShareLink() {
                                 navigator.clipboard.writeText(window.location.href);
-                                alert('Verification link copied!');
+                                var toast = document.getElementById("toast-msg");
+                                toast.className = "show";
+                                setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
                             }
                         </script>
                     </body>
